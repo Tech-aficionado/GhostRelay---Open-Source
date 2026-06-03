@@ -5,7 +5,7 @@ A privacy-focused email aliasing service that generates masked email addresses t
 ## How It Works
 
 1. **Sign up** with your real email address
-2. **Generate ghost aliases** (e.g., `xk7r9m@ghostrelay.io`)
+2. **Generate ghost aliases** (e.g., `xk7r9m@ghostrelay.me`)
 3. **Use aliases** when signing up for services, newsletters, etc.
 4. **Emails forwarded** to your real inbox transparently
 5. **Vanish anytime** — disable an alias and it disappears like a ghost

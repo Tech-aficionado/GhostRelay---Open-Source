@@ -77,7 +77,7 @@ async function createAlias(request, userId, env) {
 
     // Generate random alias address
     const aliasLocal = generateRandomAlias();
-    const domain = env.EMAIL_DOMAIN || 'yourdomain.com';
+    const domain = env.EMAIL_DOMAIN || 'ghostrelay.me';
     const address = `${aliasLocal}@${domain}`;
 
     // Ensure uniqueness
