@@ -20,19 +20,22 @@ export default function AuthForm({ onLogin }: AuthFormProps) {
 
   return (
     <div className="flex items-center justify-center min-h-screen px-5">
-      <div className="bg-slate-800 p-10 rounded-xl border border-slate-700 w-full max-w-md">
+      <div className="bg-[#12182b] p-10 rounded-xl border border-[#2a3563] w-full max-w-md shadow-[0_0_40px_rgba(124,58,237,0.1)]">
         <div className="text-center mb-8">
-          <span className="text-4xl block mb-3">✉</span>
-          <h2 className="text-2xl font-bold">
-            {isLoginMode ? "Login" : "Sign Up"}
+          <span className="text-5xl block mb-3 animate-float">👻</span>
+          <h2 className="text-2xl font-bold text-[#e8eaf6]">
+            {isLoginMode ? "Welcome Back" : "Join GhostRelay"}
           </h2>
+          <p className="text-sm text-[#8892b0] mt-2">
+            {isLoginMode ? "Enter the shadows again" : "Start hiding in the shadows"}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-5">
             <label
               htmlFor="email"
-              className="block text-sm font-semibold text-slate-400 mb-1.5"
+              className="block text-sm font-semibold text-[#8892b0] mb-1.5"
             >
               Email Address
             </label>
@@ -43,14 +46,14 @@ export default function AuthForm({ onLogin }: AuthFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.real@email.com"
               required
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-4 py-3 bg-[#0a0e1a] border border-[#2a3563] rounded-lg text-[#e8eaf6] text-sm focus:outline-none focus:border-[#7c3aed] focus:shadow-[0_0_10px_rgba(124,58,237,0.2)] transition-all"
             />
           </div>
 
           <div className="mb-6">
             <label
               htmlFor="password"
-              className="block text-sm font-semibold text-slate-400 mb-1.5"
+              className="block text-sm font-semibold text-[#8892b0] mb-1.5"
             >
               Password
             </label>
@@ -62,23 +65,23 @@ export default function AuthForm({ onLogin }: AuthFormProps) {
               placeholder="Min 8 characters"
               required
               minLength={8}
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-4 py-3 bg-[#0a0e1a] border border-[#2a3563] rounded-lg text-[#e8eaf6] text-sm focus:outline-none focus:border-[#7c3aed] focus:shadow-[0_0_10px_rgba(124,58,237,0.2)] transition-all"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-lg transition-colors"
+            className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold py-3 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]"
           >
-            {isLoginMode ? "Login" : "Create Account"}
+            {isLoginMode ? "Enter the Shadows" : "Become a Ghost"}
           </button>
         </form>
 
-        <p className="text-center mt-5 text-sm text-slate-400">
-          {isLoginMode ? "Don't have an account? " : "Already have an account? "}
+        <p className="text-center mt-5 text-sm text-[#8892b0]">
+          {isLoginMode ? "Don't have an account? " : "Already haunting? "}
           <button
             onClick={() => setIsLoginMode(!isLoginMode)}
-            className="text-indigo-300 hover:text-indigo-200 transition-colors"
+            className="text-[#a78bfa] hover:text-[#c4b5fd] transition-colors"
           >
             {isLoginMode ? "Sign Up" : "Login"}
           </button>

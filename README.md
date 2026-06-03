@@ -1,14 +1,14 @@
-# Email Alias Project
+# GhostRelay 👻
 
-A privacy-focused email aliasing service that generates masked email addresses to protect your real inbox. Built with Next.js and Cloudflare Workers.
+A privacy-focused email aliasing service that generates masked email addresses to protect your real inbox. Your emails pass through like a ghost — invisible to the world.
 
 ## How It Works
 
 1. **Sign up** with your real email address
-2. **Generate aliases** (e.g., `xk7r9m@yourdomain.com`)
+2. **Generate ghost aliases** (e.g., `xk7r9m@ghostrelay.io`)
 3. **Use aliases** when signing up for services, newsletters, etc.
 4. **Emails forwarded** to your real inbox transparently
-5. **Disable anytime** — stop receiving mail from a specific alias instantly
+5. **Vanish anytime** — disable an alias and it disappears like a ghost
 
 ## Tech Stack
 
@@ -23,12 +23,12 @@ A privacy-focused email aliasing service that generates masked email addresses t
 ## Project Structure
 
 ```
-Email-Alias-Project/
+GhostRelay/
 ├── frontend/                     # Next.js application
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── layout.tsx        # Root layout (metadata, dark theme)
-│   │   │   ├── globals.css       # Global styles + CSS variables
+│   │   │   ├── layout.tsx        # Root layout (ghost dark theme)
+│   │   │   ├── globals.css       # Global styles + ghost color scheme
 │   │   │   ├── page.tsx          # Landing page
 │   │   │   └── dashboard/
 │   │   │       └── page.tsx      # Dashboard (auth + alias management)
@@ -87,13 +87,13 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+Open [http://localhost:3000](http://localhost:3000) to see GhostRelay.
 
 ### 3. Create D1 Database
 
 ```bash
 cd worker
-wrangler d1 create email-alias-db
+wrangler d1 create ghostrelay-db
 ```
 
 Update `wrangler.toml` with the database ID returned.
@@ -101,7 +101,7 @@ Update `wrangler.toml` with the database ID returned.
 ### 4. Apply Schema
 
 ```bash
-wrangler d1 execute email-alias-db --file=../database/schema.sql
+wrangler d1 execute ghostrelay-db --file=../database/schema.sql
 ```
 
 ### 5. Configure Email Routing
@@ -128,7 +128,6 @@ npx vercel --prod
 ```bash
 cd frontend
 npm run build
-# Upload .next/static to Cloudflare Pages
 ```
 
 ## Frontend Pages
@@ -136,7 +135,7 @@ npm run build
 | Route | Description |
 |-------|-------------|
 | `/` | Landing page — features, how-it-works, pricing |
-| `/dashboard` | Auth + alias management dashboard |
+| `/dashboard` | Auth + ghost alias management dashboard |
 
 ## API Endpoints
 
@@ -151,7 +150,7 @@ npm run build
 
 ## Demo Mode
 
-The frontend works as a **standalone demo** using localStorage — no backend required. Open the dashboard, sign up with any email/password, and start creating aliases to see the full UI flow.
+The frontend works as a **standalone demo** using localStorage — no backend required. Open the dashboard, sign up with any email/password, and start creating ghost aliases to see the full UI flow.
 
 ## License
 

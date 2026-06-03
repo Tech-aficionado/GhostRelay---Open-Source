@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EmailAlias - Protect Your Privacy",
+  title: "GhostRelay - Your Emails, Invisible to the World",
   description:
-    "Generate masked email aliases to protect your real inbox from spam, data breaches, and unwanted tracking.",
+    "Generate ghost email aliases to protect your real inbox from spam, data breaches, and unwanted tracking. Your emails pass through like a ghost.",
 };
 
 export default function RootLayout({
