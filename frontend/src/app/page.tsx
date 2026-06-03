@@ -96,7 +96,7 @@ export default function HomePage() {
               What services see
             </span>
             <span className="font-mono text-sm bg-[#06d6a0]/15 text-[#6ee7b7] px-3 py-1.5 rounded-md">
-              xk7r9m@ghostrelay.io
+              xk7r9m@ghostrelay.me
             </span>
           </div>
         </div>

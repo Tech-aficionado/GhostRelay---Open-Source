@@ -27,7 +27,7 @@ interface ToastMessage {
   type: "success" | "error";
 }
 
-const DOMAIN = "ghostrelay.io";
+const DOMAIN = "ghostrelay.me";
 const MAX_FREE_ALIASES = 5;
 
 function generateRandomAlias(): string {
