@@ -1,0 +1,21 @@
+# Cloudflare Worker Configuration
+name = "email-alias-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Account settings (update with your actual account ID)
+# account_id = "your-account-id"
+
+# Environment variables
+[vars]
+EMAIL_DOMAIN = "yourdomain.com"
+JWT_SECRET = "change-this-to-a-secure-random-string"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "email-alias-db"
+database_id = "your-database-id"  # Replace after running: wrangler d1 create email-alias-db
+
+# Email routing (to receive emails)
+# Configure in Cloudflare Dashboard: Domain > Email > Email Routing > Catch-all > Send to Worker
