@@ -6,13 +6,13 @@ interface ToastProps {
 }
 
 export default function Toast({ message, type }: ToastProps) {
-  const borderColor = type === "success" ? "border-green-500" : "border-red-500";
+  const borderColor = type === "success" ? "border-[#06d6a0]" : "border-[#f43f5e]";
 
   return (
     <div
-      className={`bg-slate-800 border ${borderColor} px-6 py-3.5 rounded-lg text-sm shadow-lg animate-slide-in`}
+      className={`bg-[#12182b] border ${borderColor} px-6 py-3.5 rounded-lg text-sm shadow-lg animate-slide-in text-[#e8eaf6]`}
     >
-      {message}
+      {type === "success" ? "👻 " : "💀 "}{message}
     </div>
   );
 }

@@ -27,7 +27,7 @@ interface ToastMessage {
   type: "success" | "error";
 }
 
-const DOMAIN = "yourdomain.com";
+const DOMAIN = "ghostrelay.io";
 const MAX_FREE_ALIASES = 5;
 
 function generateRandomAlias(): string {
@@ -51,12 +51,12 @@ export default function DashboardPage() {
 
   // Load user and aliases from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem("emailAlias_user");
+    const savedUser = localStorage.getItem("ghostrelay_user");
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
       const savedAliases = localStorage.getItem(
-        "emailAlias_aliases_" + parsedUser.email
+        "ghostrelay_aliases_" + parsedUser.email
       );
       if (savedAliases) {
         setAliases(JSON.parse(savedAliases));
@@ -68,7 +68,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       localStorage.setItem(
-        "emailAlias_aliases_" + user.email,
+        "ghostrelay_aliases_" + user.email,
         JSON.stringify(aliases)
       );
     }
@@ -85,30 +85,30 @@ export default function DashboardPage() {
   const handleLogin = (email: string) => {
     const newUser = { id: generateId(), email };
     setUser(newUser);
-    localStorage.setItem("emailAlias_user", JSON.stringify(newUser));
+    localStorage.setItem("ghostrelay_user", JSON.stringify(newUser));
 
     // Load existing aliases for this user
-    const savedAliases = localStorage.getItem("emailAlias_aliases_" + email);
+    const savedAliases = localStorage.getItem("ghostrelay_aliases_" + email);
     if (savedAliases) {
       setAliases(JSON.parse(savedAliases));
     } else {
       setAliases([]);
     }
 
-    showToast("Welcome! Logged in successfully.", "success");
+    showToast("Welcome to GhostRelay! 👻", "success");
   };
 
   const handleLogout = () => {
     setUser(null);
     setAliases([]);
-    localStorage.removeItem("emailAlias_user");
-    localStorage.removeItem("emailAlias_token");
+    localStorage.removeItem("ghostrelay_user");
+    localStorage.removeItem("ghostrelay_token");
   };
 
   const handleCreateAlias = (label: string) => {
     if (aliases.length >= MAX_FREE_ALIASES) {
       showToast(
-        `Free tier limit reached (${MAX_FREE_ALIASES} aliases). Upgrade to Pro for unlimited.`,
+        `Ghost limit reached (${MAX_FREE_ALIASES}). Upgrade to Poltergeist for unlimited!`,
         "error"
       );
       return;
@@ -126,7 +126,7 @@ export default function DashboardPage() {
 
     setAliases((prev) => [newAlias, ...prev]);
     setShowCreateModal(false);
-    showToast(`Alias created: ${address}`, "success");
+    showToast(`Ghost summoned: ${address}`, "success");
   };
 
   const handleToggleAlias = (id: string) => {
@@ -135,17 +135,17 @@ export default function DashboardPage() {
     );
     const alias = aliases.find((a) => a.id === id);
     showToast(
-      alias?.active ? "Alias disabled" : "Alias enabled",
+      alias?.active ? "Ghost vanished (disabled)" : "Ghost reawakened (enabled)",
       "success"
     );
   };
 
   const handleDeleteAlias = (id: string) => {
-    if (!confirm("Delete this alias? Emails sent to it will no longer be forwarded.")) {
+    if (!confirm("Banish this ghost? Emails sent to it will no longer be forwarded.")) {
       return;
     }
     setAliases((prev) => prev.filter((a) => a.id !== id));
-    showToast("Alias deleted", "success");
+    showToast("Ghost banished forever", "success");
   };
 
   const handleCopyAlias = (address: string) => {
@@ -173,51 +173,51 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Your Aliases</h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {aliases.length} / {MAX_FREE_ALIASES} aliases used
+            <h1 className="text-3xl font-bold text-[#e8eaf6]">Your Ghosts</h1>
+            <p className="text-[#8892b0] text-sm mt-1">
+              {aliases.length} / {MAX_FREE_ALIASES} phantoms summoned
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
+            className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold px-5 py-2.5 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]"
           >
-            + New Alias
+            + Summon Ghost
           </button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
-            <div className="text-3xl font-bold text-indigo-300">{aliases.length}</div>
-            <div className="text-sm text-slate-400 mt-1">Total Aliases</div>
+          <div className="bg-[#12182b] p-6 rounded-xl border border-[#2a3563] text-center">
+            <div className="text-3xl font-bold text-[#a78bfa]">{aliases.length}</div>
+            <div className="text-sm text-[#8892b0] mt-1">Total Ghosts</div>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
-            <div className="text-3xl font-bold text-indigo-300">{activeCount}</div>
-            <div className="text-sm text-slate-400 mt-1">Active</div>
+          <div className="bg-[#12182b] p-6 rounded-xl border border-[#2a3563] text-center">
+            <div className="text-3xl font-bold text-[#06d6a0]">{activeCount}</div>
+            <div className="text-sm text-[#8892b0] mt-1">Active</div>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
-            <div className="text-3xl font-bold text-indigo-300">{totalForwarded}</div>
-            <div className="text-sm text-slate-400 mt-1">Emails Forwarded</div>
+          <div className="bg-[#12182b] p-6 rounded-xl border border-[#2a3563] text-center">
+            <div className="text-3xl font-bold text-[#a78bfa]">{totalForwarded}</div>
+            <div className="text-sm text-[#8892b0] mt-1">Emails Relayed</div>
           </div>
         </div>
 
         {/* Alias List */}
         <div className="flex flex-col gap-3">
           {aliases.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <div className="text-5xl mb-4">📬</div>
-              <h3 className="text-slate-100 font-semibold text-lg mb-2">
-                No aliases yet
+            <div className="text-center py-16 text-[#8892b0]">
+              <div className="text-6xl mb-4 animate-float">👻</div>
+              <h3 className="text-[#e8eaf6] font-semibold text-lg mb-2">
+                No ghosts yet
               </h3>
               <p className="mb-6">
-                Create your first alias to start protecting your privacy.
+                Summon your first ghost alias to start protecting your privacy.
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold px-5 py-2.5 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]"
               >
-                Create First Alias
+                Summon First Ghost
               </button>
             </div>
           ) : (
