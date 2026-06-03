@@ -3,65 +3,65 @@ import Navbar from "@/components/Navbar";
 
 const features = [
   {
-    icon: "🔒",
-    title: "Privacy Protection",
+    icon: "👻",
+    title: "Ghost Mode Privacy",
     description:
-      "Never reveal your real email address to services you don't fully trust.",
+      "Your real email stays invisible. Services only see your ghost alias — never the real you.",
   },
   {
-    icon: "🗑️",
-    title: "Spam Control",
+    icon: "🔮",
+    title: "Vanish Spam Instantly",
     description:
-      "Getting spam? Just disable the alias. Your real inbox stays clean.",
+      "Getting spam? Disable the alias and it vanishes. Your real inbox stays pristine.",
   },
   {
-    icon: "🔍",
-    title: "Track Who Sells Your Data",
+    icon: "🕵️",
+    title: "Unmask Data Sellers",
     description:
-      "Use unique aliases per service — instantly know who leaked your email.",
+      "Use unique ghost aliases per service — instantly know who leaked or sold your email.",
   },
   {
     icon: "⚡",
-    title: "Instant Setup",
+    title: "Summon in One Click",
     description:
-      "Generate a new alias in one click. No configuration needed.",
+      "Generate a new ghost alias instantly. No configuration, no waiting.",
   },
   {
-    icon: "🔁",
+    icon: "🔗",
     title: "Seamless Forwarding",
     description:
-      "All mail sent to your alias lands in your real inbox automatically.",
+      "Emails pass through your ghost alias to your real inbox. Completely transparent.",
   },
   {
-    icon: "💰",
-    title: "Free Forever",
+    icon: "🆓",
+    title: "Haunt for Free",
     description:
-      "Core features are free. Built on Cloudflare's generous free tier.",
+      "Core features are free forever. Built on Cloudflare's generous free tier.",
   },
 ];
 
 const steps = [
   {
     number: 1,
-    title: "Sign Up",
-    description: "Create an account with your real email address (kept private).",
+    title: "Summon",
+    description: "Create an account with your real email — it stays hidden in the shadows.",
   },
   {
     number: 2,
-    title: "Generate Aliases",
+    title: "Generate Ghosts",
     description:
-      "Create random or custom aliases for each service you sign up for.",
+      "Conjure random ghost aliases for each service you sign up for.",
   },
   {
     number: 3,
-    title: "Use Everywhere",
+    title: "Deploy Everywhere",
     description:
-      "Give out your alias instead of your real email. Emails forward to your inbox.",
+      "Give out your ghost alias. Emails relay through invisibly to your inbox.",
   },
   {
     number: 4,
-    title: "Stay in Control",
-    description: "Disable or delete aliases anytime from your dashboard.",
+    title: "Vanish at Will",
+    description: "Disable or banish any alias from your haunting dashboard.",
   },
 ];
 
@@ -72,31 +72,31 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="text-center px-5 pt-24 pb-20 max-w-3xl mx-auto">
+        <div className="text-6xl mb-6 animate-float">👻</div>
         <h1 className="text-5xl font-extrabold mb-5 leading-tight">
-          Your Email, <span className="text-indigo-300">Your Rules</span>
+          Your Emails, <span className="ghost-gradient-text">Invisible to the World</span>
         </h1>
-        <p className="text-lg text-slate-400 mb-10 max-w-xl mx-auto">
-          Generate unlimited masked email aliases to protect your real inbox
-          from spam, data breaches, and unwanted tracking.
+        <p className="text-lg text-[#8892b0] mb-10 max-w-xl mx-auto">
+          Generate ghost email aliases that forward to your real inbox. Stay hidden from spam, data breaches, and prying eyes.
         </p>
 
         {/* Demo Box */}
-        <div className="inline-flex items-center gap-4 bg-slate-800 px-8 py-5 rounded-xl border border-slate-700 flex-wrap justify-center mb-10">
+        <div className="inline-flex items-center gap-4 bg-[#12182b] px-8 py-5 rounded-xl border border-[#2a3563] flex-wrap justify-center mb-10 ghost-glow">
           <div className="text-center">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wide block mb-1">
+            <span className="text-[11px] text-[#8892b0] uppercase tracking-wide block mb-1">
               Your real email (hidden)
             </span>
-            <span className="font-mono text-sm bg-red-500/15 text-red-300 px-3 py-1.5 rounded-md line-through">
+            <span className="font-mono text-sm bg-[#f43f5e]/15 text-[#fda4af] px-3 py-1.5 rounded-md line-through">
               you@gmail.com
             </span>
           </div>
-          <span className="text-2xl text-slate-400">→</span>
+          <span className="text-2xl text-[#8892b0]">👻→</span>
           <div className="text-center">
-            <span className="text-[11px] text-slate-400 uppercase tracking-wide block mb-1">
+            <span className="text-[11px] text-[#8892b0] uppercase tracking-wide block mb-1">
               What services see
             </span>
-            <span className="font-mono text-sm bg-green-500/15 text-green-300 px-3 py-1.5 rounded-md">
-              xk7r9m@yourdomain.com
+            <span className="font-mono text-sm bg-[#06d6a0]/15 text-[#6ee7b7] px-3 py-1.5 rounded-md">
+              xk7r9m@ghostrelay.me
             </span>
           </div>
         </div>
@@ -104,25 +104,26 @@ export default function HomePage() {
         <div>
           <Link
             href="/dashboard"
-            className="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-8 py-3.5 rounded-lg text-base transition-all hover:-translate-y-0.5"
+            className="inline-block bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold px-8 py-3.5 rounded-lg text-base transition-all hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(124,58,237,0.4)]"
           >
-            Get Started Free
+            Start Haunting — It&apos;s Free
           </Link>
         </div>
       </section>
 
       {/* Features Section */}
       <section id="features" className="px-10 py-20 max-w-6xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-12">Why Use Email Aliases?</h2>
+        <h2 className="text-3xl font-bold mb-4">Why Go Ghost?</h2>
+        <p className="text-[#8892b0] mb-12 max-w-lg mx-auto">Protect your identity with phantom email aliases that disappear on command.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="bg-slate-800 p-8 rounded-xl border border-slate-700 text-left transition-all hover:-translate-y-1 hover:border-indigo-500"
+              className="bg-[#12182b] p-8 rounded-xl border border-[#2a3563] text-left transition-all hover:-translate-y-1 hover:border-[#7c3aed] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
             >
               <div className="text-3xl mb-3">{feature.icon}</div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-slate-400 text-sm">{feature.description}</p>
+              <h3 className="text-lg font-semibold mb-2 text-[#e8eaf6]">{feature.title}</h3>
+              <p className="text-[#8892b0] text-sm">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -130,15 +131,16 @@ export default function HomePage() {
 
       {/* How It Works Section */}
       <section id="how-it-works" className="px-10 py-20 max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-12">How It Works</h2>
+        <h2 className="text-3xl font-bold mb-4">How GhostRelay Works</h2>
+        <p className="text-[#8892b0] mb-12">Four simple steps to digital invisibility.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step) => (
             <div key={step.number} className="text-center">
-              <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div className="w-12 h-12 bg-[#7c3aed] rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-[0_0_20px_rgba(124,58,237,0.3)]">
                 {step.number}
               </div>
-              <h3 className="font-semibold mb-2">{step.title}</h3>
-              <p className="text-slate-400 text-sm">{step.description}</p>
+              <h3 className="font-semibold mb-2 text-[#e8eaf6]">{step.title}</h3>
+              <p className="text-[#8892b0] text-sm">{step.description}</p>
             </div>
           ))}
         </div>
@@ -146,66 +148,67 @@ export default function HomePage() {
 
       {/* Pricing Section */}
       <section id="pricing" className="px-10 py-20 max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-12">Simple Pricing</h2>
+        <h2 className="text-3xl font-bold mb-4">Simple Pricing</h2>
+        <p className="text-[#8892b0] mb-12">Start haunting for free. Upgrade when you need more phantoms.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
           {/* Free Plan */}
-          <div className="bg-slate-800 p-10 rounded-xl border border-slate-700">
-            <h3 className="text-xl font-semibold mb-3">Free</h3>
-            <div className="text-5xl font-extrabold mb-6">
-              $0<span className="text-base text-slate-400 font-normal">/forever</span>
+          <div className="bg-[#12182b] p-10 rounded-xl border border-[#2a3563]">
+            <h3 className="text-xl font-semibold mb-3 text-[#e8eaf6]">Ghost</h3>
+            <div className="text-5xl font-extrabold mb-6 text-[#e8eaf6]">
+              $0<span className="text-base text-[#8892b0] font-normal">/forever</span>
             </div>
             <ul className="text-left space-y-3 mb-8">
-              {["5 email aliases", "Unlimited forwarding", "Enable/disable aliases", "Basic dashboard"].map((item) => (
-                <li key={item} className="text-slate-400 text-sm border-b border-slate-700 pb-2">
-                  <span className="text-green-400 font-bold mr-2">✓</span>
+              {["5 ghost aliases", "Unlimited forwarding", "Enable/disable aliases", "Haunting dashboard"].map((item) => (
+                <li key={item} className="text-[#8892b0] text-sm border-b border-[#2a3563] pb-2">
+                  <span className="text-[#06d6a0] font-bold mr-2">✓</span>
                   {item}
                 </li>
               ))}
             </ul>
             <Link
               href="/dashboard"
-              className="block text-center border border-slate-600 hover:border-indigo-500 text-slate-200 font-semibold px-5 py-2.5 rounded-lg transition-colors"
+              className="block text-center border border-[#2a3563] hover:border-[#7c3aed] text-[#e8eaf6] font-semibold px-5 py-2.5 rounded-lg transition-colors"
             >
-              Get Started
+              Start Free
             </Link>
           </div>
 
           {/* Pro Plan */}
-          <div className="bg-slate-800 p-10 rounded-xl border border-indigo-500 relative scale-105">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-xs font-semibold px-4 py-1 rounded-full">
-              Popular
+          <div className="bg-[#12182b] p-10 rounded-xl border border-[#7c3aed] relative scale-105 shadow-[0_0_30px_rgba(124,58,237,0.2)]">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#7c3aed] text-xs font-semibold px-4 py-1 rounded-full text-white">
+              Poltergeist
             </span>
-            <h3 className="text-xl font-semibold mb-3">Pro</h3>
-            <div className="text-5xl font-extrabold mb-6">
-              $3<span className="text-base text-slate-400 font-normal">/month</span>
+            <h3 className="text-xl font-semibold mb-3 text-[#e8eaf6]">Pro</h3>
+            <div className="text-5xl font-extrabold mb-6 text-[#e8eaf6]">
+              $3<span className="text-base text-[#8892b0] font-normal">/month</span>
             </div>
             <ul className="text-left space-y-3 mb-8">
               {[
-                "Unlimited aliases",
+                "Unlimited ghost aliases",
                 "Custom alias names",
-                "Reply from alias",
-                "Activity analytics",
+                "Reply from ghost alias",
+                "Haunt analytics",
                 "Priority support",
               ].map((item) => (
-                <li key={item} className="text-slate-400 text-sm border-b border-slate-700 pb-2">
-                  <span className="text-green-400 font-bold mr-2">✓</span>
+                <li key={item} className="text-[#8892b0] text-sm border-b border-[#2a3563] pb-2">
+                  <span className="text-[#06d6a0] font-bold mr-2">✓</span>
                   {item}
                 </li>
               ))}
             </ul>
             <Link
               href="/dashboard"
-              className="block text-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
+              className="block text-center bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold px-5 py-2.5 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]"
             >
-              Upgrade
+              Go Poltergeist
             </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-10 border-t border-slate-700 text-slate-400 text-sm">
-        <p>&copy; 2024 EmailAlias. Built with privacy in mind.</p>
+      <footer className="text-center py-10 border-t border-[#2a3563] text-[#8892b0] text-sm">
+        <p>👻 GhostRelay — Your emails, invisible to the world.</p>
       </footer>
     </>
   );
