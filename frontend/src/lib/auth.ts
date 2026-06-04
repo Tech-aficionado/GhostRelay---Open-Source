@@ -95,6 +95,10 @@ export function saveAuthData(data: {
   setRefreshToken(data.refreshToken);
   setSessionId(data.sessionId);
   setStoredUser(data.user);
+  // Notify extension sync script of auth state change
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("ghostrelay-auth-change"));
+  }
 }
 
 /**
@@ -105,6 +109,10 @@ export function clearAuth(): void {
   removeRefreshToken();
   removeSessionId();
   removeStoredUser();
+  // Notify extension sync script of auth state change
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("ghostrelay-auth-change"));
+  }
 }
 
 /**
