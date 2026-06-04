@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostRelay</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e1a;
+      color: #e8eaf6;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    /* Login form */
+    #login-section { display: none; }
+    #login-section.active { display: block; }
+    #main-section { display: none; }
+    #main-section.active { display: block; }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #12182b;
+      border: 1px solid #2a3563;
+      border-radius: 8px;
+      color: #e8eaf6;
+      font-size: 13px;
+      margin-bottom: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #6366f1; }
+    input::placeholder { color: #4a5580; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #2a3563;
+      border-radius: 8px;
+      color: #8892b0;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: #6366f1; color: #6366f1; }
+
+    .alias-display {
+      background: #12182b;
+      border: 1px solid #2a3563;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .alias-display .alias-text {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #6366f1;
+      word-break: break-all;
+      flex: 1;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid #2a3563;
+      color: #8892b0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: #6366f1; color: #6366f1; }
+    .copy-btn.copied { border-color: #06d6a0; color: #06d6a0; }
+
+    .label-input {
+      margin-top: 12px;
+    }
+    .label-input label {
+      font-size: 11px;
+      color: #8892b0;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .status {
+      font-size: 11px;
+      text-align: center;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+    .status.success { color: #06d6a0; }
+    .status.error { color: #f43f5e; }
+
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #2a3563;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a {
+      color: #6366f1;
+      font-size: 11px;
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+    .footer .logout-btn {
+      background: none;
+      border: none;
+      color: #8892b0;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .footer .logout-btn:hover { color: #f43f5e; }
+
+    .fill-btn {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid #06d6a0;
+      border-radius: 8px;
+      color: #06d6a0;
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .fill-btn:hover { background: #06d6a0; color: #0a0e1a; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #2a3563;
+    }
+    .divider span {
+      padding: 0 8px;
+      color: #4a5580;
+      font-size: 11px;
+    }
+
+    .user-email {
+      font-size: 11px;
+      color: #8892b0;
+      text-align: center;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      background: #12182b;
+      border-radius: 6px;
+      border: 1px solid #2a3563;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">G</div>
+    <h1>GhostRelay</h1>
+  </div>
+
+  <!-- Login Section -->
+  <div id="login-section" class="active">
+    <input type="email" id="login-email" placeholder="Email" autocomplete="email" aria-label="Email address">
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" aria-label="Password">
+    <button class="btn-primary" id="login-btn">Sign In</button>
+    <div class="divider"><span>or</span></div>
+    <button class="btn-secondary" id="web-login-btn">Sign in via GhostRelay website</button>
+    <div class="status" id="login-status" role="alert" aria-live="polite"></div>
+  </div>
+
+  <!-- Main Section -->
+  <div id="main-section">
+    <div class="user-email" id="user-email" style="display: none;"></div>
+
+    <div class="label-input">
+      <label>Label (optional)</label>
+      <input type="text" id="alias-label" placeholder="e.g. Netflix signup">
+    </div>
+
+    <button class="btn-primary" id="generate-btn">⚡ Generate New Alias</button>
+
+    <div class="alias-display" id="alias-result" style="display: none;" role="region" aria-label="Generated alias">
+      <span class="alias-text" id="alias-text"></span>
+      <button class="copy-btn" id="copy-btn" aria-label="Copy alias to clipboard">Copy</button>
+    </div>
+
+    <button class="fill-btn" id="fill-btn" style="display: none;" aria-label="Fill alias into active email field">
+      📋 Fill into active email field
+    </button>
+
+    <div class="status" id="main-status" role="alert" aria-live="polite"></div>
+
+    <div class="footer">
+      <a href="https://ghostrelay.me/dashboard" target="_blank">Open Dashboard</a>
+      <button class="logout-btn" id="logout-btn">Logout</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

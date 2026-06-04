@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "GhostRelay - Email Alias Generator",
+  "version": "1.0.0",
+  "description": "Auto-generate a new GhostRelay email alias directly from signup forms and copy it to clipboard.",
+  "permissions": ["activeTab", "storage", "contextMenus", "tabs", "scripting"],
+  "host_permissions": ["https://ghostrelay.me/*", "https://www.ghostrelay.me/*", "https://email-alias-worker.ghostrelay-1.workers.dev/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://ghostrelay.me/*", "https://www.ghostrelay.me/*", "https://frontend-pearl-six-47.vercel.app/*"],
+      "js": ["sync.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
