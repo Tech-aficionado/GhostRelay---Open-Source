@@ -1,0 +1,15 @@
+# Build output
+dist/
+web-ext-artifacts/
+
+# Dependencies (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Packed extension
+*.zip
+*.xpi
+*.crx

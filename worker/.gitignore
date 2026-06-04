@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Wrangler local state
+.wrangler/
+.mf/
+
+# Environment / secrets
+.env
+.env.local
+.dev.vars
+
+# Build output
+dist/
+
+# Vercel (if applicable)
+.vercel/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
