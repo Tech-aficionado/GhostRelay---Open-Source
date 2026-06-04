@@ -1,0 +1,139 @@
+"use client";
+
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { getToken, getStoredUser, clearAuth, getAuthProvider, firebaseSignOut, onFirebaseAuthChanged, getFirebaseToken, removeAuthProvider } from "@/lib/auth";
+import * as api from "@/lib/api";
+import type { User, ToastMessage } from "@/lib/types";
+
+interface DashboardContextValue {
+  user: User | null;
+  isDemo: boolean;
+  bounceCount: number;
+  toasts: ToastMessage[];
+  showToast: (message: string, type?: "success" | "error") => void;
+  handleLogout: () => Promise<void>;
+  setBounceCount: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const DashboardContext = createContext<DashboardContextValue | null>(null);
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+}
+
+export function DashboardProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+  const [bounceCount, setBounceCount] = useState(0);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
+    const id = generateId();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    const provider = getAuthProvider();
+
+    if (provider === "firebase") {
+      await firebaseSignOut();
+      removeAuthProvider();
+    } else {
+      const token = getToken();
+      if (token && !isDemo) {
+        try {
+          await api.logout(token);
+        } catch {
+          // Proceed with local logout even if server call fails
+        }
+      }
+      clearAuth();
+      removeAuthProvider();
+    }
+
+    setUser(null);
+    window.location.href = "/dashboard";
+  }, [isDemo]);
+
+  useEffect(() => {
+    const provider = getAuthProvider();
+
+    if (provider === "firebase") {
+      // Listen for Firebase auth state changes
+      let unsubscribe: (() => void) | null = null;
+
+      onFirebaseAuthChanged(async (firebaseUser) => {
+        if (firebaseUser) {
+          setUser({ id: firebaseUser.uid, email: firebaseUser.email || "" });
+          // Refresh the token for API calls
+          const token = await getFirebaseToken();
+          if (token) {
+            // Token is available for API use
+          }
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }).then((unsub) => {
+        unsubscribe = unsub;
+      });
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    } else {
+      // Existing email/password auth flow
+      const storedUser = getStoredUser();
+      if (storedUser) {
+        setUser(storedUser);
+        const token = getToken();
+        const demoMode = !token;
+        setIsDemo(demoMode);
+
+        // Load bounce count
+        if (!demoMode && token) {
+          api.getBounceStats(token).then((stats) => {
+            setBounceCount(stats.unacknowledged);
+          }).catch(() => {});
+        }
+      }
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[var(--relay-primary)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <DashboardContext.Provider
+      value={{
+        user,
+        isDemo,
+        bounceCount,
+        toasts,
+        showToast,
+        handleLogout,
+        setBounceCount,
+      }}
+    >
+      {children}
+    </DashboardContext.Provider>
+  );
+}
+
+export function useDashboard() {
+  const ctx = useContext(DashboardContext);
+  if (!ctx) {
+    throw new Error("useDashboard must be used within DashboardProvider");
+  }
+  return ctx;
+}
