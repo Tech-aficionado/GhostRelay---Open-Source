@@ -3,19 +3,21 @@ name = "email-alias-worker"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# Account settings (update with your actual account ID)
-# account_id = "your-account-id"
-
 # Environment variables
 [vars]
 EMAIL_DOMAIN = "ghostrelay.me"
-JWT_SECRET = "change-this-to-a-secure-random-string"
+JWT_SECRET = "}0D$@,c/WDIJvy_`k3Q)Du/5swcd=9Po"
 
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
-database_name = "email-alias-db"
-database_id = "your-database-id"  # Replace after running: wrangler d1 create email-alias-db
+database_name = "ghostrelay-db"
+database_id = "6c8d4b69-d312-4ffa-9186-475a999e9b6b"
 
-# Email routing (to receive emails)
-# Configure in Cloudflare Dashboard: Domain > Email > Email Routing > Catch-all > Send to Worker
+# Secrets (set via: npx wrangler secret put <NAME>):
+#   JWT_SECRET       — token signing key
+#   RESEND_API_KEY   — from https://resend.com/api-keys
+#   RESEND_WEBHOOK_SECRET — from Resend webhook settings (for bounce verification)
+#
+# Email routing (to receive emails):
+#   Cloudflare Dashboard → Domain → Email → Email Routing → Catch-all → Send to Worker

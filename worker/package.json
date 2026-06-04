@@ -11,8 +11,7 @@
     "db:migrate": "wrangler d1 execute email-alias-db --file=../database/schema.sql",
     "db:migrate:local": "wrangler d1 execute email-alias-db --local --file=../database/schema.sql"
   },
-  "dependencies": {},
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.97.0"
   }
 }
