@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
-    plan TEXT DEFAULT 'free',
     created_at TEXT NOT NULL,
     updated_at TEXT
 );
