@@ -2,9 +2,9 @@
  * GhostRelay Browser Extension - Popup Script
  * Handles auth, alias generation, and clipboard/form filling
  * 
- * Auth is shared with the GhostRelay website:
- * - If you log in on the website, the extension auto-picks it up (via sync.js)
- * - If you log in via the extension, it pushes tokens to the website too
+ * Auth sync with website:
+ * - sync.js runs on ghostrelay.me and pushes localStorage tokens to chrome.storage
+ * - When you open this popup and tokens are in chrome.storage, you're logged in
  */
 
 const API_BASE = 'https://email-alias-worker.ghostrelay-1.workers.dev';
@@ -13,11 +13,9 @@ const WEBSITE_URL = 'https://ghostrelay.me';
 let currentAlias = '';
 let isGenerating = false;
 
-// Wait for DOM
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  // DOM elements
   const loginSection = document.getElementById('login-section');
   const mainSection = document.getElementById('main-section');
   const loginBtn = document.getElementById('login-btn');
@@ -33,12 +31,11 @@ async function init() {
   const fillBtn = document.getElementById('fill-btn');
   const mainStatus = document.getElementById('main-status');
   const logoutBtn = document.getElementById('logout-btn');
+  const userBadge = document.getElementById('user-badge');
+  const userAvatar = document.getElementById('user-avatar');
   const userEmailEl = document.getElementById('user-email');
 
-  if (!loginSection || !mainSection || !loginBtn || !generateBtn) {
-    console.error('GhostRelay: DOM elements not found');
-    return;
-  }
+  if (!loginSection || !mainSection) return;
 
   // Check auth state
   const { token, userEmail } = await chrome.storage.local.get(['token', 'userEmail']);
@@ -56,9 +53,10 @@ async function init() {
   function showMain(email) {
     loginSection.classList.remove('active');
     mainSection.classList.add('active');
-    if (userEmailEl && email) {
+    if (email && userBadge && userEmailEl && userAvatar) {
       userEmailEl.textContent = email;
-      userEmailEl.style.display = 'block';
+      userAvatar.textContent = email.charAt(0).toUpperCase();
+      userBadge.classList.add('visible');
     }
   }
 
@@ -66,15 +64,12 @@ async function init() {
     if (!el) return;
     el.textContent = msg;
     el.className = `status ${type}`;
-    if (msg) {
-      setTimeout(() => {
-        el.textContent = '';
-        el.className = 'status';
-      }, 4000);
+    if (msg && type !== 'info') {
+      setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 4000);
     }
   }
 
-  // Login via extension form
+  // -- Login via email/password --
   loginBtn.addEventListener('click', async () => {
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
@@ -88,7 +83,6 @@ async function init() {
     loginBtn.textContent = 'Signing in...';
 
     try {
-      // First verify we can reach the API
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,10 +90,8 @@ async function init() {
       });
 
       let data;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error(`Server error (status ${res.status}). Try again later.`);
+      try { data = await res.json(); } catch {
+        throw new Error(`Server error (${res.status})`);
       }
 
       if (!res.ok) {
@@ -107,26 +99,21 @@ async function init() {
       }
 
       if (!data.token || !data.refreshToken || !data.user) {
-        throw new Error('Invalid response from server');
+        throw new Error('Unexpected server response');
       }
 
-      // Store in extension
       await chrome.storage.local.set({
         token: data.token,
         refreshToken: data.refreshToken,
         userEmail: data.user.email,
-        syncedFromWebsite: false,
       });
 
-      // Push tokens to the website so they share the same session
+      // Sync to website
       pushTokensToWebsite(data.token, data.refreshToken, data.user.email);
-
       showMain(data.user.email);
-      setStatus(loginStatus, '', '');
     } catch (err) {
-      // Distinguish network errors from API errors
       if (err instanceof TypeError) {
-        setStatus(loginStatus, 'Cannot reach server. Check internet connection.', 'error');
+        setStatus(loginStatus, 'Cannot reach server. Check your connection.', 'error');
       } else {
         setStatus(loginStatus, err.message, 'error');
       }
@@ -136,20 +123,15 @@ async function init() {
     }
   });
 
-  // "Sign in via website" button — opens the site, background monitors for login
+  // -- Sign in via website --
   if (webLoginBtn) {
-    webLoginBtn.addEventListener('click', async () => {
-      // Open the website dashboard (forces login if not authenticated)
-      await chrome.tabs.create({ url: `${WEBSITE_URL}/dashboard` });
-      
-      // Tell background to start monitoring for login
-      chrome.runtime.sendMessage({ type: 'WATCH_FOR_LOGIN' });
-      
-      setStatus(loginStatus, 'Log in on the website, then reopen this popup.', 'success');
+    webLoginBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: `${WEBSITE_URL}/dashboard` });
+      setStatus(loginStatus, 'Sign in on the site, then click the extension icon again.', 'info');
     });
   }
 
-  // Generate alias handler
+  // -- Generate alias --
   generateBtn.addEventListener('click', async () => {
     if (isGenerating) return;
     await generateAlias(false);
@@ -157,15 +139,12 @@ async function init() {
 
   async function generateAlias(isRetry) {
     const { token } = await chrome.storage.local.get('token');
-    if (!token) {
-      showLogin();
-      return;
-    }
+    if (!token) { showLogin(); return; }
 
     const label = aliasLabel.value.trim();
     isGenerating = true;
     generateBtn.disabled = true;
-    generateBtn.textContent = 'Generating...';
+    generateBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Creating...';
 
     try {
       const res = await fetch(`${API_BASE}/api/aliases`, {
@@ -181,222 +160,154 @@ async function init() {
         const newToken = await doRefreshToken();
         if (!newToken) {
           showLogin();
-          setStatus(loginStatus, 'Session expired. Please sign in again.', 'error');
+          setStatus(loginStatus, 'Session expired. Please sign in.', 'error');
           return;
         }
         return generateAlias(true);
       }
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create alias');
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to create alias');
 
       currentAlias = data.alias.address;
       aliasText.textContent = currentAlias;
-      aliasResult.style.display = 'flex';
-      fillBtn.style.display = 'block';
+      aliasResult.classList.add('visible');
+      fillBtn.classList.add('visible');
 
-      // Copy to clipboard
       const copied = await safeCopyToClipboard(currentAlias);
       if (copied) {
-        setStatus(mainStatus, 'Created & copied to clipboard!', 'success');
+        setStatus(mainStatus, 'Copied to clipboard!', 'success');
         copyBtn.textContent = 'Copied!';
         copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy';
-          copyBtn.classList.remove('copied');
-        }, 2000);
+        setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
       } else {
-        setStatus(mainStatus, 'Created! Click Copy to copy.', 'success');
+        setStatus(mainStatus, 'Alias created!', 'success');
       }
     } catch (err) {
-      setStatus(mainStatus, err.message, 'error');
+      if (err instanceof TypeError) {
+        setStatus(mainStatus, 'Network error. Try again.', 'error');
+      } else {
+        setStatus(mainStatus, err.message, 'error');
+      }
     } finally {
       isGenerating = false;
       generateBtn.disabled = false;
-      generateBtn.textContent = '⚡ Generate New Alias';
+      generateBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Generate Alias';
     }
   }
 
-  // Copy button
+  // -- Copy --
   copyBtn.addEventListener('click', async () => {
     if (!currentAlias) return;
     const copied = await safeCopyToClipboard(currentAlias);
     if (copied) {
       copyBtn.textContent = 'Copied!';
       copyBtn.classList.add('copied');
-      setTimeout(() => {
-        copyBtn.textContent = 'Copy';
-        copyBtn.classList.remove('copied');
-      }, 2000);
-    } else {
-      setStatus(mainStatus, 'Copy failed. Select text manually.', 'error');
+      setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
     }
   });
 
-  // Fill into active email field
+  // -- Fill --
   fillBtn.addEventListener('click', async () => {
     if (!currentAlias) return;
-
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.id) {
-        setStatus(mainStatus, 'No active tab found', 'error');
-        return;
-      }
+      if (!tab?.id) { setStatus(mainStatus, 'No active tab', 'error'); return; }
 
       try {
-        await chrome.tabs.sendMessage(tab.id, {
-          type: 'FILL_EMAIL',
-          email: currentAlias,
-        });
-        setStatus(mainStatus, 'Filled into email field!', 'success');
+        await chrome.tabs.sendMessage(tab.id, { type: 'FILL_EMAIL', email: currentAlias });
+        setStatus(mainStatus, 'Filled!', 'success');
       } catch {
+        // Inject content script and retry
         try {
-          await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content.js'],
-          });
-          await chrome.tabs.sendMessage(tab.id, {
-            type: 'FILL_EMAIL',
-            email: currentAlias,
-          });
-          setStatus(mainStatus, 'Filled into email field!', 'success');
+          await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] });
+          await chrome.tabs.sendMessage(tab.id, { type: 'FILL_EMAIL', email: currentAlias });
+          setStatus(mainStatus, 'Filled!', 'success');
         } catch {
           setStatus(mainStatus, 'Cannot fill on this page', 'error');
         }
       }
-    } catch {
-      setStatus(mainStatus, 'Failed to fill field', 'error');
-    }
+    } catch { setStatus(mainStatus, 'Failed', 'error'); }
   });
 
-  // Logout handler
+  // -- Logout --
   logoutBtn.addEventListener('click', async () => {
-    await chrome.storage.local.remove(['token', 'refreshToken', 'userEmail', 'syncedFromWebsite']);
+    await chrome.storage.local.remove(['token', 'refreshToken', 'userEmail']);
     currentAlias = '';
-    aliasResult.style.display = 'none';
-    fillBtn.style.display = 'none';
-    if (userEmailEl) {
-      userEmailEl.textContent = '';
-      userEmailEl.style.display = 'none';
-    }
-    showLogin();
+    aliasResult.classList.remove('visible');
+    fillBtn.classList.remove('visible');
+    userBadge.classList.remove('visible');
     clearWebsiteTokens();
+    showLogin();
   });
 
-  // Enter key shortcuts
-  loginPassword.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginBtn.click();
-  });
-  loginEmail.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginPassword.focus();
-  });
-  aliasLabel.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') generateBtn.click();
-  });
+  // -- Keyboard shortcuts --
+  loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+  loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') loginPassword.focus(); });
+  aliasLabel.addEventListener('keydown', e => { if (e.key === 'Enter') generateBtn.click(); });
 
-  // Listen for storage changes (in case sync.js pushes tokens while popup is open)
+  // -- Listen for storage changes while popup is open (e.g. sync.js pushes token) --
   chrome.storage.onChanged.addListener((changes) => {
-    if (changes.token && changes.token.newValue) {
-      chrome.storage.local.get(['userEmail']).then(({ userEmail }) => {
-        showMain(userEmail);
-      });
+    if (changes.token?.newValue) {
+      chrome.storage.local.get(['userEmail']).then(({ userEmail }) => showMain(userEmail));
     }
   });
 }
 
-/**
- * Refresh the access token. Returns new token or null.
- */
+// === Helper functions (outside init to be accessible) ===
+
 async function doRefreshToken() {
   const { refreshToken } = await chrome.storage.local.get('refreshToken');
   if (!refreshToken) return null;
-
   try {
     const res = await fetch(`${API_BASE}/api/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
     });
-
     if (!res.ok) {
-      await chrome.storage.local.remove(['token', 'refreshToken', 'userEmail', 'syncedFromWebsite']);
+      await chrome.storage.local.remove(['token', 'refreshToken', 'userEmail']);
       return null;
     }
-
     const data = await res.json();
     await chrome.storage.local.set({ token: data.token });
-    pushTokensToWebsite(data.token, null, null);
     return data.token;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-/**
- * Push tokens to the GhostRelay website via the sync content script
- */
 function pushTokensToWebsite(token, refreshToken, userEmail) {
   chrome.tabs.query({ url: ['*://ghostrelay.me/*', '*://www.ghostrelay.me/*', '*://frontend-pearl-six-47.vercel.app/*'] })
     .then(tabs => {
       for (const tab of tabs) {
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, {
-            type: 'PUSH_TOKEN_TO_WEBSITE',
-            token,
-            refreshToken,
-            userEmail,
-          }).catch(() => {});
-        }
+        if (tab.id) chrome.tabs.sendMessage(tab.id, { type: 'PUSH_TOKEN_TO_WEBSITE', token, refreshToken, userEmail }).catch(() => {});
       }
     }).catch(() => {});
 }
 
-/**
- * Clear tokens on the website when logging out from extension
- */
 function clearWebsiteTokens() {
   chrome.tabs.query({ url: ['*://ghostrelay.me/*', '*://www.ghostrelay.me/*', '*://frontend-pearl-six-47.vercel.app/*'] })
     .then(tabs => {
       for (const tab of tabs) {
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, {
-            type: 'PUSH_TOKEN_TO_WEBSITE',
-            token: null,
-            refreshToken: null,
-            userEmail: null,
-          }).catch(() => {});
-        }
+        if (tab.id) chrome.tabs.sendMessage(tab.id, { type: 'PUSH_TOKEN_TO_WEBSITE', token: null, refreshToken: null, userEmail: null }).catch(() => {});
       }
     }).catch(() => {});
 }
 
-/**
- * Safely copy to clipboard with fallback
- */
 async function safeCopyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
     try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      textarea.style.top = '-9999px';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
       const ok = document.execCommand('copy');
-      document.body.removeChild(textarea);
+      document.body.removeChild(ta);
       return ok;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 }
