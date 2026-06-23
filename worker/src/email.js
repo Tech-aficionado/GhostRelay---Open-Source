@@ -94,7 +94,7 @@ export async function handleEmail(message, env) {
 
     // Read and parse email body (with size limit)
     const rawBody = await readStream(message.raw, MAX_EMAIL_SIZE);
-    const emailText = extractBody(rawBody);
+    const { text: emailText, html: emailHtml } = extractBodyParts(rawBody);
 
     // Sanitize sender name for the From header
     const senderName = sanitizeHeaderValue(extractName(senderAddress));
@@ -108,13 +108,18 @@ export async function handleEmail(message, env) {
     const destinations = await getForwardingDestinations(alias.id, alias.forward_to, env);
 
     try {
+        // Build forwarded email content
+        const forwardedHtml = emailHtml
+            ? buildHtmlWrapper(senderAddress, recipientAddress, emailHtml)
+            : buildHtml(senderAddress, recipientAddress, emailText);
+
         const resendPayload = {
             from: `${senderName} via GhostRelay <${fromAddress}>`,
             to: destinations,
             reply_to: senderAddress,
             subject: subject,
-            html: buildHtml(senderAddress, recipientAddress, emailText),
-            text: emailText,
+            html: forwardedHtml,
+            text: emailText || stripHtml(emailHtml || ''),
             headers: {
                 // Custom headers for bounce tracking
                 'X-GhostRelay-Alias-ID': alias.id,
@@ -163,6 +168,22 @@ export async function handleEmail(message, env) {
             'INSERT INTO email_logs (id, alias_id, sender, subject, forwarded_at) VALUES (?, ?, ?, ?, ?)'
         ).bind(crypto.randomUUID(), alias.id, senderAddress, subject, new Date().toISOString()).run();
 
+        // Retain only the last 1000 logs per user to prevent unbounded growth
+        // Runs probabilistically (~10% of the time) to avoid overhead on every email
+        if (Math.random() < 0.1) {
+            try {
+                await env.DB.prepare(`
+                    DELETE FROM email_logs WHERE id IN (
+                        SELECT l.id FROM email_logs l
+                        JOIN aliases a ON l.alias_id = a.id
+                        WHERE a.user_id = ?
+                        ORDER BY l.forwarded_at DESC
+                        LIMIT -1 OFFSET 1000
+                    )
+                `).bind(alias.user_id).run();
+            } catch { /* non-critical — skip silently */ }
+        }
+
         // Send push notifications to user
         await sendPushNotification(env, alias.user_id, {
             title: `New email via ${recipientAddress}`,
@@ -182,10 +203,14 @@ export async function handleEmail(message, env) {
  */
 async function forwardOrgEmail(message, env, recipientAddress, senderAddress, subject) {
     const rawBody = await readStream(message.raw, MAX_EMAIL_SIZE);
-    const emailText = extractBody(rawBody);
+    const { text: emailText, html: emailHtml } = extractBodyParts(rawBody);
     const senderName = sanitizeHeaderValue(extractName(senderAddress));
     const domain = env.EMAIL_DOMAIN || 'ghostrelay.me';
     const fromAddress = `${recipientAddress.split('@')[0]}@${domain}`;
+
+    const forwardedHtml = emailHtml
+        ? buildHtmlWrapper(senderAddress, recipientAddress, emailHtml)
+        : buildHtml(senderAddress, recipientAddress, emailText);
 
     try {
         const resendPayload = {
@@ -193,8 +218,8 @@ async function forwardOrgEmail(message, env, recipientAddress, senderAddress, su
             to: [ORG_FORWARD_TO],
             reply_to: senderAddress,
             subject: `[${recipientAddress.split('@')[0]}] ${subject}`,
-            html: buildHtml(senderAddress, recipientAddress, emailText),
-            text: emailText,
+            html: forwardedHtml,
+            text: emailText || stripHtml(emailHtml || ''),
             headers: {
                 'X-GhostRelay-Org-Email': recipientAddress,
                 'X-GhostRelay-Original-From': senderAddress,
@@ -495,28 +520,137 @@ async function readStream(stream, maxSize) {
 }
 
 function extractBody(rawBytes) {
+    const { text } = extractBodyParts(rawBytes);
+    return text;
+}
+
+/**
+ * Extract both text/plain and text/html parts from a raw email.
+ * Returns { text, html } where either may be empty string.
+ */
+function extractBodyParts(rawBytes) {
     const raw = new TextDecoder().decode(rawBytes);
     const sep = raw.includes('\r\n\r\n') ? '\r\n\r\n' : '\n\n';
     const headerEnd = raw.indexOf(sep);
-    if (headerEnd === -1) return '';
+    if (headerEnd === -1) return { text: '', html: '' };
 
+    const headers = raw.substring(0, headerEnd);
     let body = raw.substring(headerEnd + sep.length);
 
-    const boundaryMatch = raw.match(/boundary="?([^"\r\n;]+)"?/i);
+    const boundaryMatch = headers.match(/boundary="?([^"\r\n;]+)"?/i);
     if (boundaryMatch) {
-        const parts = body.split('--' + boundaryMatch[1]);
+        const boundary = boundaryMatch[1];
+        const parts = body.split('--' + boundary);
+        let text = '';
+        let html = '';
+
         for (const part of parts) {
-            if (part.toLowerCase().includes('content-type: text/plain')) {
-                const partSep = part.includes('\r\n\r\n') ? '\r\n\r\n' : '\n\n';
-                const partStart = part.indexOf(partSep);
-                if (partStart !== -1) {
-                    return part.substring(partStart + partSep.length).trim().substring(0, 50000);
+            const partLower = part.toLowerCase();
+            const partSep = part.includes('\r\n\r\n') ? '\r\n\r\n' : '\n\n';
+            const partStart = part.indexOf(partSep);
+            if (partStart === -1) continue;
+
+            const partContent = part.substring(partStart + partSep.length).trim();
+
+            // Handle nested multipart (e.g. multipart/alternative inside multipart/mixed)
+            const nestedBoundaryMatch = part.match(/boundary="?([^"\r\n;]+)"?/i);
+            if (nestedBoundaryMatch) {
+                const nestedParts = partContent.split('--' + nestedBoundaryMatch[1]);
+                for (const nested of nestedParts) {
+                    const nestedLower = nested.toLowerCase();
+                    const nSep = nested.includes('\r\n\r\n') ? '\r\n\r\n' : '\n\n';
+                    const nStart = nested.indexOf(nSep);
+                    if (nStart === -1) continue;
+                    const nestedContent = nested.substring(nStart + nSep.length).trim();
+
+                    if (nestedLower.includes('content-type: text/plain') && !text) {
+                        text = decodePartContent(nested, nestedContent).substring(0, 50000);
+                    } else if (nestedLower.includes('content-type: text/html') && !html) {
+                        html = decodePartContent(nested, nestedContent).substring(0, 100000);
+                    }
                 }
+                continue;
+            }
+
+            if (partLower.includes('content-type: text/plain') && !text) {
+                text = decodePartContent(part, partContent).substring(0, 50000);
+            } else if (partLower.includes('content-type: text/html') && !html) {
+                html = decodePartContent(part, partContent).substring(0, 100000);
             }
         }
+
+        return { text, html };
     }
 
-    return body.trim().substring(0, 50000);
+    // Non-multipart: check Content-Type in headers
+    const ctLower = headers.toLowerCase();
+    if (ctLower.includes('content-type: text/html') || ctLower.includes('content-type:text/html')) {
+        return { text: '', html: body.trim().substring(0, 100000) };
+    }
+
+    return { text: body.trim().substring(0, 50000), html: '' };
+}
+
+/**
+ * Decode MIME part content based on Content-Transfer-Encoding
+ */
+function decodePartContent(partHeaders, content) {
+    const headersLower = partHeaders.toLowerCase();
+
+    if (headersLower.includes('content-transfer-encoding: quoted-printable')) {
+        return decodeQuotedPrintable(content);
+    }
+    if (headersLower.includes('content-transfer-encoding: base64')) {
+        try {
+            return atob(content.replace(/\s/g, ''));
+        } catch {
+            return content;
+        }
+    }
+    return content;
+}
+
+/**
+ * Decode quoted-printable encoded content
+ */
+function decodeQuotedPrintable(str) {
+    return str
+        .replace(/=\r?\n/g, '') // soft line breaks
+        .replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+/**
+ * Strip HTML tags for plain text fallback
+ */
+function stripHtml(html) {
+    return html
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 50000);
+}
+
+/**
+ * Wrap original HTML email with GhostRelay footer (preserves original rendering)
+ */
+function buildHtmlWrapper(from, alias, originalHtml) {
+    const footer = `<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e5e5;font-size:11px;color:#999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+This email was sent to <strong>${esc(alias)}</strong> and forwarded by <a href="https://ghostrelay.me" style="color:#7c3aed;text-decoration:none;">GhostRelay</a>.
+Original sender: ${esc(from)}
+</div>`;
+
+    // Insert footer before </body> if it exists, otherwise append
+    if (originalHtml.toLowerCase().includes('</body>')) {
+        return originalHtml.replace(/<\/body>/i, `${footer}</body>`);
+    }
+    return originalHtml + footer;
 }
 
 // ===== Multiple Destinations =====

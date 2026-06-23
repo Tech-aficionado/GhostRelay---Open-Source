@@ -120,7 +120,28 @@ export function clearAuth(): void {
  * Access tokens may be expired but can be refreshed
  */
 export function hasSession(): boolean {
-  return !!getRefreshToken();
+  return !!getRefreshToken() || getAuthProvider() === "firebase";
+}
+
+/**
+ * Get a valid token for API calls — handles both email/password and Firebase auth.
+ * For Firebase users, refreshes the ID token from Firebase SDK.
+ * For email/password users, returns the stored access token.
+ */
+export async function getActiveToken(): Promise<string | null> {
+  const provider = getAuthProvider();
+
+  if (provider === "firebase") {
+    // Get fresh Firebase ID token
+    const token = await getFirebaseToken();
+    if (token) {
+      setToken(token); // keep localStorage in sync
+    }
+    return token;
+  }
+
+  // Email/password — return stored token (auto-refresh happens in apiRequest)
+  return getToken();
 }
 
 // ===== Auth Provider Tracking =====

@@ -6,7 +6,8 @@ compatibility_date = "2024-01-01"
 # Environment variables
 [vars]
 EMAIL_DOMAIN = "ghostrelay.me"
-JWT_SECRET = "}0D$@,c/WDIJvy_`k3Q)Du/5swcd=9Po"
+# JWT_SECRET is set via: npx wrangler secret put JWT_SECRET
+# NEVER put secrets in this file — they get committed to git
 
 # D1 Database binding
 [[d1_databases]]

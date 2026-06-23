@@ -153,6 +153,13 @@ async function login({ email, password }, env, request) {
     // Enforce max sessions — remove oldest if at limit
     await enforceSessionLimit(user.id, env);
 
+    // Update last_login_at
+    try {
+        await env.DB.prepare(
+            'UPDATE users SET last_login_at = ? WHERE id = ?'
+        ).bind(new Date().toISOString(), user.id).run();
+    } catch { /* column might not exist yet */ }
+
     // Create session
     const deviceName = parseUserAgent(request.headers.get('User-Agent') || '');
     const ipAddress = request.headers.get('CF-Connecting-IP') || 'unknown';
@@ -170,45 +177,50 @@ async function login({ email, password }, env, request) {
  * Refresh an expired access token using a valid refresh token
  */
 async function refreshAccessToken({ refreshToken }, env) {
-    if (!refreshToken || typeof refreshToken !== 'string') {
-        return Response.json({ error: 'Refresh token required' }, { status: 400 });
+    try {
+        if (!refreshToken || typeof refreshToken !== 'string') {
+            return Response.json({ error: 'Refresh token required' }, { status: 400 });
+        }
+
+        if (refreshToken.length > 4096) {
+            return Response.json({ error: 'Invalid token' }, { status: 401 });
+        }
+
+        // Hash the refresh token to look it up
+        const tokenHash = await sha256Hex(refreshToken);
+
+        const session = await env.DB.prepare(
+            'SELECT id, user_id, expires_at, revoked FROM sessions WHERE token_hash = ?'
+        ).bind(tokenHash).first();
+
+        if (!session) {
+            return Response.json({ error: 'Invalid refresh token' }, { status: 401 });
+        }
+
+        if (session.revoked) {
+            return Response.json({ error: 'Session has been revoked' }, { status: 401 });
+        }
+
+        if (new Date(session.expires_at) < new Date()) {
+            return Response.json({ error: 'Refresh token expired. Please login again.' }, { status: 401 });
+        }
+
+        // Update last_used_at
+        await env.DB.prepare(
+            'UPDATE sessions SET last_used_at = ? WHERE id = ?'
+        ).bind(new Date().toISOString(), session.id).run();
+
+        // Issue new access token (short-lived)
+        const accessToken = await generateAccessToken(session.user_id, session.id, env);
+
+        return Response.json({
+            token: accessToken,
+            sessionId: session.id,
+        });
+    } catch (error) {
+        console.error('Refresh token error:', error.message || error);
+        return Response.json({ error: 'Failed to refresh session. Please login again.' }, { status: 401 });
     }
-
-    if (refreshToken.length > 4096) {
-        return Response.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    // Hash the refresh token to look it up
-    const tokenHash = await sha256Hex(refreshToken);
-
-    const session = await env.DB.prepare(
-        'SELECT id, user_id, expires_at, revoked FROM sessions WHERE token_hash = ?'
-    ).bind(tokenHash).first();
-
-    if (!session) {
-        return Response.json({ error: 'Invalid refresh token' }, { status: 401 });
-    }
-
-    if (session.revoked) {
-        return Response.json({ error: 'Session has been revoked' }, { status: 401 });
-    }
-
-    if (new Date(session.expires_at) < new Date()) {
-        return Response.json({ error: 'Refresh token expired. Please login again.' }, { status: 401 });
-    }
-
-    // Update last_used_at
-    await env.DB.prepare(
-        'UPDATE sessions SET last_used_at = ? WHERE id = ?'
-    ).bind(new Date().toISOString(), session.id).run();
-
-    // Issue new access token (short-lived)
-    const accessToken = await generateAccessToken(session.user_id, session.id, env);
-
-    return Response.json({
-        token: accessToken,
-        sessionId: session.id,
-    });
 }
 
 /**
@@ -248,8 +260,31 @@ async function listSessions(request, env) {
 
     // Get current session ID from token
     const token = request.headers.get('Authorization')?.substring(7)?.trim();
-    const payload = await decodeTokenPayload(token, env);
-    const currentSessionId = payload?.sid || null;
+    const tokenParts = token ? token.split('.') : [];
+    let currentSessionId = null;
+
+    // Only custom tokens (2-part) have session IDs
+    if (tokenParts.length === 2) {
+        const payload = await decodeTokenPayload(token, env);
+        currentSessionId = payload?.sid || null;
+    }
+
+    // For Firebase users with no sessions, show their current login as a virtual session
+    if (results.length === 0) {
+        const deviceName = parseUserAgent(request.headers.get('User-Agent') || '');
+        const ipAddress = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+        return Response.json({
+            sessions: [{
+                id: 'current',
+                deviceName,
+                ipAddress,
+                createdAt: new Date().toISOString(),
+                lastUsedAt: new Date().toISOString(),
+                isCurrent: true,
+            }],
+        });
+    }
 
     return Response.json({
         sessions: results.map(s => ({
@@ -427,12 +462,213 @@ export async function authenticateRequest(request, env) {
     }
 
     const token = authHeader.substring(7).trim();
-    if (token.length > 2048) return null;
+    if (token.length > 4096) return null;
 
-    const payload = await verifyToken(token, env);
-    if (!payload) return null;
+    // Try custom HMAC token first (2-part format)
+    const parts = token.split('.');
+    if (parts.length === 2) {
+        const payload = await verifyToken(token, env);
+        if (payload) return payload.sub;
+    }
 
-    return payload.sub;
+    // Try Firebase JWT (3-part format)
+    if (parts.length === 3) {
+        const firebaseUserId = await verifyFirebaseToken(token, env);
+        if (firebaseUserId) return firebaseUserId;
+    }
+
+    return null;
+}
+
+/**
+ * Verify a Firebase ID token (RS256 JWT from Google)
+ * Returns the user ID (sub claim) if valid, null otherwise
+ */
+async function verifyFirebaseToken(token, env) {
+    try {
+        const [headerB64, payloadB64, signatureB64] = token.split('.');
+
+        // Decode header and payload
+        const header = JSON.parse(atob(headerB64.replace(/-/g, '+').replace(/_/g, '/')));
+        const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')));
+
+        // Validate basic JWT claims
+        const projectId = 'ghostrelay-5dde0';
+        const now = Math.floor(Date.now() / 1000);
+
+        if (header.alg !== 'RS256') return null;
+        if (!payload.sub || typeof payload.sub !== 'string') return null;
+        if (payload.aud !== projectId) return null;
+        if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null;
+        if (payload.exp < now) return null;
+        if (payload.iat > now + 60) return null; // Allow 60s clock skew
+
+        // Verify signature using Google's public keys
+        const keyId = header.kid;
+        if (!keyId) return null;
+
+        const publicKey = await getGooglePublicKey(keyId);
+        if (!publicKey) return null;
+
+        // Verify RS256 signature
+        const signedContent = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
+        const signature = Uint8Array.from(atob(signatureB64.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+
+        const valid = await crypto.subtle.verify(
+            { name: 'RSASSA-PKCS1-v1_5' },
+            publicKey,
+            signature,
+            signedContent
+        );
+
+        if (!valid) return null;
+
+        // Ensure user exists in our DB (auto-create for Firebase users)
+        const userId = payload.sub;
+        const email = payload.email || '';
+
+        const existing = await env.DB.prepare(
+            'SELECT id FROM users WHERE id = ?'
+        ).bind(userId).first();
+
+        if (!existing && email) {
+            // Auto-create user record for Firebase-authenticated users
+            try {
+                await env.DB.prepare(
+                    "INSERT OR IGNORE INTO users (id, email, password_hash, salt, created_at, last_login_at) VALUES (?, ?, 'firebase', 'firebase', ?, ?)"
+                ).bind(userId, email, new Date().toISOString(), new Date().toISOString()).run();
+            } catch {
+                // May already exist with a different ID but same email
+                const byEmail = await env.DB.prepare(
+                    'SELECT id FROM users WHERE email = ?'
+                ).bind(email).first();
+                if (byEmail) return byEmail.id;
+            }
+        } else if (existing) {
+            // Update last_login_at on each verification (throttled — only if older than 5 min)
+            try {
+                await env.DB.prepare(
+                    "UPDATE users SET last_login_at = ? WHERE id = ? AND (last_login_at IS NULL OR last_login_at < ?)"
+                ).bind(new Date().toISOString(), userId, new Date(Date.now() - 300000).toISOString()).run();
+            } catch { /* column might not exist yet */ }
+        }
+
+        return userId;
+    } catch (error) {
+        console.error('Firebase token verification error:', error.message || error);
+        return null;
+    }
+}
+
+// Cache Google's public keys (they rotate infrequently)
+let googleKeysCache = null;
+let googleKeysCacheExpiry = 0;
+
+async function getGooglePublicKey(keyId) {
+    const now = Date.now();
+
+    // Fetch keys if not cached or expired
+    if (!googleKeysCache || now > googleKeysCacheExpiry) {
+        try {
+            const res = await fetch(
+                'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+            );
+            if (!res.ok) return null;
+
+            const keys = await res.json();
+            googleKeysCache = {};
+
+            // Import all keys as CryptoKey objects
+            for (const [kid, cert] of Object.entries(keys)) {
+                const pemBody = cert
+                    .replace('-----BEGIN CERTIFICATE-----', '')
+                    .replace('-----END CERTIFICATE-----', '')
+                    .replace(/\s/g, '');
+                const binaryDer = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+
+                try {
+                    const cryptoKey = await crypto.subtle.importKey(
+                        'spki',
+                        extractPublicKeyFromCert(binaryDer),
+                        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+                        false,
+                        ['verify']
+                    );
+                    googleKeysCache[kid] = cryptoKey;
+                } catch {
+                    // Skip invalid keys
+                }
+            }
+
+            // Cache for 1 hour
+            googleKeysCacheExpiry = now + 3600000;
+        } catch {
+            return null;
+        }
+    }
+
+    return googleKeysCache?.[keyId] || null;
+}
+
+/**
+ * Extract SubjectPublicKeyInfo from an X.509 DER certificate
+ * This is a simplified ASN.1 parser for the specific structure we need
+ */
+function extractPublicKeyFromCert(certDer) {
+    // X.509 certificate structure (simplified):
+    // SEQUENCE { tbsCertificate, signatureAlgorithm, signature }
+    // tbsCertificate SEQUENCE { version, serialNumber, signature, issuer, validity, subject, subjectPublicKeyInfo, ... }
+    // We need to find subjectPublicKeyInfo which starts with SEQUENCE { algorithm, BIT STRING { publicKey } }
+
+    // Look for the RSA OID (1.2.840.113549.1.1.1) in the certificate
+    // which precedes the public key
+    const rsaOid = [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01];
+
+    let offset = -1;
+    for (let i = 0; i < certDer.length - rsaOid.length; i++) {
+        let match = true;
+        for (let j = 0; j < rsaOid.length; j++) {
+            if (certDer[i + j] !== rsaOid[j]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            // Found the OID, now we need to go back to find the SEQUENCE that contains it
+            // The subjectPublicKeyInfo SEQUENCE starts a few bytes before the algorithm SEQUENCE
+            // Walk backwards to find the enclosing SEQUENCE (0x30)
+            let seqStart = i - 2; // skip OID tag and length
+            while (seqStart > 0 && certDer[seqStart] !== 0x30) {
+                seqStart--;
+            }
+            // Go one more SEQUENCE back for the subjectPublicKeyInfo wrapper
+            seqStart--;
+            while (seqStart > 0 && certDer[seqStart] !== 0x30) {
+                seqStart--;
+            }
+            offset = seqStart;
+            break;
+        }
+    }
+
+    if (offset === -1) return certDer; // Fallback: try the whole thing
+
+    // Read the SEQUENCE length at offset to get the full subjectPublicKeyInfo
+    const tag = certDer[offset];
+    if (tag !== 0x30) return certDer;
+
+    let len = certDer[offset + 1];
+    let headerLen = 2;
+    if (len & 0x80) {
+        const numBytes = len & 0x7f;
+        len = 0;
+        for (let i = 0; i < numBytes; i++) {
+            len = (len << 8) | certDer[offset + 2 + i];
+        }
+        headerLen = 2 + numBytes;
+    }
+
+    return certDer.slice(offset, offset + headerLen + len);
 }
 
 // ===== Crypto Helpers =====

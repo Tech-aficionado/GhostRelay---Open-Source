@@ -54,7 +54,7 @@ async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promis
 
   // Auto-refresh on 401 if we have a refresh token
   if (response.status === 401 && !skipRefresh && token) {
-    const { getRefreshToken, setToken: saveToken } = await import("./auth");
+    const { getRefreshToken, setToken: saveToken, clearAuth } = await import("./auth");
     const refreshToken = getRefreshToken();
     if (refreshToken) {
       try {
@@ -63,7 +63,11 @@ async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promis
         // Retry original request with new token
         return apiRequest<T>(endpoint, { ...options, token: refreshResult.token, skipRefresh: true });
       } catch {
-        // Refresh failed — token is truly expired
+        // Refresh failed — session is truly expired, clear auth state
+        clearAuth();
+        if (typeof window !== "undefined") {
+          window.location.href = "/dashboard";
+        }
         throw new ApiError(
           (data.error as string) || "Session expired. Please login again.",
           401
@@ -536,6 +540,98 @@ export async function unsubscribePush(endpoint: string, token: string): Promise<
   await apiRequest("/api/push/unsubscribe", {
     method: "DELETE",
     body: { endpoint },
+    token,
+  });
+}
+
+// ===== User Settings =====
+
+export interface UserSettings {
+  displayName: string;
+  emailNotifications: boolean;
+  weeklyReport: boolean;
+  bounceAlerts: boolean;
+}
+
+export async function getUserSettings(token: string): Promise<UserSettings> {
+  return apiRequest<UserSettings>("/api/settings", { token });
+}
+
+export async function updateUserSettings(token: string, settings: Partial<UserSettings>): Promise<{ success: boolean }> {
+  return apiRequest("/api/settings", {
+    method: "PATCH",
+    body: settings,
+    token,
+  });
+}
+
+// ===== Data Export =====
+
+export async function exportUserData(token: string): Promise<Record<string, unknown>> {
+  return apiRequest("/api/settings/export", { token });
+}
+
+// ===== Account Deletion =====
+
+export async function deleteAccount(token: string): Promise<{ success: boolean }> {
+  return apiRequest("/api/settings/delete-account", {
+    method: "DELETE",
+    token,
+  });
+}
+
+// ===== Two-Factor Authentication =====
+
+export async function send2FACode(purpose: "enable" | "disable", token: string): Promise<{ message: string; expiresIn: number }> {
+  return apiRequest("/api/auth/2fa/send-code", {
+    method: "POST",
+    body: { purpose },
+    token,
+  });
+}
+
+export async function enable2FA(code: string, token: string): Promise<{ success: boolean; message: string }> {
+  return apiRequest("/api/auth/2fa/enable", {
+    method: "POST",
+    body: { code },
+    token,
+  });
+}
+
+export async function disable2FA(code: string, token: string): Promise<{ success: boolean; message: string }> {
+  return apiRequest("/api/auth/2fa/disable", {
+    method: "POST",
+    body: { code },
+    token,
+  });
+}
+
+export async function get2FAStatus(token: string): Promise<{ enabled: boolean }> {
+  return apiRequest("/api/auth/2fa/status", { token });
+}
+
+// ===== Security =====
+
+export interface SecurityFactor {
+  label: string;
+  points: number;
+  achieved: boolean;
+}
+
+export interface SecurityScoreResponse {
+  score: number;
+  maxScore: number;
+  rating: string;
+  factors: SecurityFactor[];
+}
+
+export async function getSecurityScore(token: string): Promise<SecurityScoreResponse> {
+  return apiRequest<SecurityScoreResponse>("/api/security/score", { token });
+}
+
+export async function revokeAllOtherSessions(token: string): Promise<{ success: boolean; revokedCount: number; message: string }> {
+  return apiRequest("/api/auth/sessions/revoke-all", {
+    method: "POST",
     token,
   });
 }

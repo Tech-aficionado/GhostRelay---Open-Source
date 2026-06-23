@@ -14,6 +14,9 @@ import { handlePasswordReset } from './password-reset.js';
 import { handleWildcards } from './wildcards.js';
 import { handleDestinations } from './destinations.js';
 import { handlePush } from './push.js';
+import { handleTwoFactor } from './two-factor.js';
+import { handleSecurity } from './security.js';
+import { handleSettings } from './settings.js';
 
 // Allowed frontend origins
 const ALLOWED_ORIGINS = [
@@ -105,7 +108,25 @@ export default {
         try {
             let response;
 
-            if (path.startsWith('/api/auth')) {
+            if (path.startsWith('/api/security')) {
+                // Rate limit security: 15 requests per 60 seconds per IP
+                if (!checkRateLimit(`security:${clientIP}`, 15, 60000)) {
+                    return Response.json(
+                        { error: 'Too many requests. Please slow down.' },
+                        { status: 429, headers: corsHeaders }
+                    );
+                }
+                response = await handleSecurity(request, env, path);
+            } else if (path.startsWith('/api/settings')) {
+                // Rate limit settings: 10 requests per 60 seconds per IP
+                if (!checkRateLimit(`settings:${clientIP}`, 10, 60000)) {
+                    return Response.json(
+                        { error: 'Too many requests. Please slow down.' },
+                        { status: 429, headers: corsHeaders }
+                    );
+                }
+                response = await handleSettings(request, env, path);
+            } else if (path.startsWith('/api/auth')) {
                 // Rate limit auth: 10 requests per 60 seconds per IP
                 if (!checkRateLimit(`auth:${clientIP}`, 10, 60000)) {
                     return Response.json(
@@ -116,6 +137,10 @@ export default {
                 // Password reset endpoints
                 if (path.startsWith('/api/auth/forgot-password') || path.startsWith('/api/auth/reset-password') || path.startsWith('/api/auth/verify-reset-token')) {
                     response = await handlePasswordReset(request, env, path);
+                } else if (path.startsWith('/api/auth/2fa')) {
+                    response = await handleTwoFactor(request, env, path);
+                } else if (path === '/api/auth/sessions/revoke-all') {
+                    response = await handleSecurity(request, env, path);
                 } else {
                     response = await handleAuth(request, env, path);
                 }

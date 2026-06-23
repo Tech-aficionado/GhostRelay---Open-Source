@@ -76,32 +76,35 @@ const steps = [
   },
 ];
 
-const testimonials = [
+const useCases = [
   {
-    name: "Sarah Chen",
-    role: "Product Designer at Vercel",
-    avatar: "SC",
-    content: "GhostRelay is a game-changer. I use unique aliases for every SaaS tool and finally caught who was selling my data.",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    ),
+    title: "SaaS Signups",
+    description: "Use a unique alias for every tool. If one gets breached, your real email stays safe.",
   },
   {
-    name: "Marcus Johnson",
-    role: "Security Engineer",
-    avatar: "MJ",
-    content: "As someone in infosec, I recommend GhostRelay to everyone. The architecture is solid and the UX is surprisingly simple.",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    ),
+    title: "Online Shopping",
+    description: "Give stores disposable aliases. Disable them the moment the order arrives.",
   },
   {
-    name: "Emma Rodriguez",
-    role: "Freelance Developer",
-    avatar: "ER",
-    content: "I give clients unique aliases now. When a project ends, I just disable it. No more spam from old contacts.",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    ),
+    title: "Freelance Work",
+    description: "One alias per client. When the project ends, disable it — no lingering spam.",
   },
 ];
 
 const stats = [
-  { value: "2M+", label: "Emails Forwarded" },
-  { value: "50K+", label: "Active Users" },
-  { value: "99.9%", label: "Uptime" },
+  { value: "100%", label: "Private by Design" },
+  { value: "20", label: "Aliases Per Account" },
   { value: "<50ms", label: "Avg Delivery" },
+  { value: "250+", label: "Edge Locations" },
 ];
 
 export default function HomePage() {
@@ -115,7 +118,7 @@ export default function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2.5 bg-[var(--relay-primary)]/8 border border-[var(--relay-primary)]/20 text-[var(--relay-primary)] text-xs font-medium px-4 py-2 rounded-full mb-8 sm:mb-10 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 bg-[var(--relay-success)] rounded-full animate-pulse-soft"></span>
-            Trusted by 50,000+ privacy-conscious users
+            Privacy-first email aliasing — powered by Cloudflare&apos;s edge network
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 sm:mb-8 leading-[1.1] tracking-tight">
@@ -187,12 +190,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trusted By */}
+      {/* Built With */}
       <section className="px-6 md:px-10 lg:px-16 py-12 max-w-5xl mx-auto text-center">
-        <p className="text-[10px] text-[var(--relay-text-dim)] uppercase tracking-[0.2em] font-semibold mb-8">Trusted by teams at</p>
+        <p className="text-[10px] text-[var(--relay-text-dim)] uppercase tracking-[0.2em] font-semibold mb-8">Built with</p>
         <div className="flex flex-wrap items-center justify-center gap-10 text-[var(--relay-text-dim)]">
-          {["Vercel", "Stripe", "Notion", "Linear", "Figma", "Supabase"].map((company) => (
-            <span key={company} className="text-base font-bold opacity-30 hover:opacity-60 transition-opacity">{company}</span>
+          {["Cloudflare Workers", "Cloudflare D1", "Next.js", "React 19", "Tailwind CSS", "Resend"].map((tech) => (
+            <span key={tech} className="text-base font-bold opacity-30 hover:opacity-60 transition-opacity">{tech}</span>
           ))}
         </div>
       </section>
@@ -258,30 +261,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Use Cases */}
       <section className="px-6 md:px-10 lg:px-16 py-28 max-w-6xl mx-auto">
         <div className="text-center mb-20">
           <div className="accent-line w-12 mx-auto mb-6"></div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-5 tracking-tight">Loved by Privacy-First People</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-5 tracking-tight">Built for Real Scenarios</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {testimonials.map((t) => (
-            <div key={t.name} className="glass-card p-7 rounded-xl">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="14" height="14" fill="#f59e0b" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                ))}
+          {useCases.map((uc) => (
+            <div key={uc.title} className="glass-card p-7 rounded-xl">
+              <div className="w-11 h-11 rounded-lg bg-[var(--relay-primary)]/8 border border-[var(--relay-primary)]/15 flex items-center justify-center text-[var(--relay-primary)] mb-5">
+                {uc.icon}
               </div>
-              <p className="text-[var(--relay-text-muted)] text-sm leading-relaxed mb-6">&ldquo;{t.content}&rdquo;</p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[var(--relay-border)]">
-                <div className="w-9 h-9 rounded-lg relay-gradient flex items-center justify-center text-white text-xs font-bold">
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-[var(--relay-text)]">{t.name}</div>
-                  <div className="text-xs text-[var(--relay-text-dim)]">{t.role}</div>
-                </div>
-              </div>
+              <h3 className="text-base font-semibold mb-2 text-[var(--relay-text)]">{uc.title}</h3>
+              <p className="text-[var(--relay-text-muted)] text-sm leading-relaxed">{uc.description}</p>
             </div>
           ))}
         </div>
@@ -291,15 +284,15 @@ export default function HomePage() {
       <section id="pricing" className="px-6 md:px-10 lg:px-16 py-28 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <div className="accent-line w-12 mx-auto mb-6"></div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-5 tracking-tight">Free Forever. No Catch.</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-5 tracking-tight">Simple Pricing. No Surprises.</h2>
           <p className="text-[var(--relay-text-muted)] text-base">
-            GhostRelay is completely free with up to 20 email aliases per account.
+            Everything you need to protect your email privacy — included in one plan.
           </p>
         </div>
         <div className="glass-card p-10 rounded-xl max-w-md mx-auto text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] relay-gradient"></div>
-          <div className="text-5xl font-extrabold mb-2 text-[var(--relay-text)]">$0</div>
-          <p className="text-[var(--relay-text-dim)] text-sm mb-8 uppercase tracking-wider font-medium">forever</p>
+          <div className="text-5xl font-extrabold mb-2 text-[var(--relay-text)]">Free</div>
+          <p className="text-[var(--relay-text-dim)] text-sm mb-8 uppercase tracking-wider font-medium">no credit card required</p>
           <ul className="space-y-3 mb-10 text-left max-w-xs mx-auto">
             {["Up to 20 email aliases", "Unlimited forwarding", "Custom alias names", "Enable/disable anytime", "Privacy dashboard & analytics", "No ads, no tracking"].map((item) => (
               <li key={item} className="text-[var(--relay-text-muted)] text-sm flex items-start gap-3">
@@ -342,7 +335,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-bold mb-5 tracking-tight">Ready to Go Invisible?</h2>
           <p className="text-[var(--relay-text-muted)] mb-10 max-w-md mx-auto text-base">
-            Join 50,000+ users who keep their email private. Takes 30 seconds to start.
+            Keep your real email private. Takes 30 seconds to start.
           </p>
           <Link
             href="/dashboard"

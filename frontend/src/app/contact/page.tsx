@@ -10,7 +10,6 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulated form submission
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
     setFormData({ name: "", email: "", subject: "", message: "" });
@@ -27,7 +26,7 @@ export default function ContactPage() {
           Get In Touch
         </h1>
         <p className="text-base text-[var(--relay-text-muted)] max-w-md mx-auto">
-          Have a question, want to partner, or need enterprise support? We&apos;d love to hear from you.
+          Have a question, found a bug, or want to suggest a feature? We&apos;d love to hear from you.
         </p>
       </section>
 
@@ -41,35 +40,25 @@ export default function ContactPage() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </div>
               <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">Email</h3>
-              <p className="text-xs text-[var(--relay-text-muted)]">support@ghostrelay.me</p>
-              <p className="text-xs text-[var(--relay-text-muted)]">sales@ghostrelay.me</p>
+              <a href="mailto:support@ghostrelay.me" className="text-xs text-[var(--relay-text-muted)] hover:text-[var(--relay-primary)] transition-colors block">support@ghostrelay.me</a>
             </div>
 
             <div className="glass-card p-5 rounded-xl">
               <div className="w-9 h-9 rounded-lg bg-[var(--relay-primary)]/8 border border-[var(--relay-primary)]/15 flex items-center justify-center text-[var(--relay-primary)] mb-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
               </div>
-              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">Live Chat</h3>
-              <p className="text-xs text-[var(--relay-text-muted)]">Mon-Fri, 9am-6pm EST</p>
-              <p className="text-xs text-[var(--relay-text-muted)]">Avg response: &lt;2 hours</p>
+              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">GitHub</h3>
+              <a href="https://github.com/ghostrelay" target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--relay-text-muted)] hover:text-[var(--relay-primary)] transition-colors block">github.com/ghostrelay</a>
+              <p className="text-xs text-[var(--relay-text-dim)] mt-1">Issues &amp; feature requests</p>
             </div>
 
             <div className="glass-card p-5 rounded-xl">
               <div className="w-9 h-9 rounded-lg bg-[var(--relay-primary)]/8 border border-[var(--relay-primary)]/15 flex items-center justify-center text-[var(--relay-primary)] mb-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">Social</h3>
-              <p className="text-xs text-[var(--relay-text-muted)]">@ghostrelay on Twitter</p>
-              <p className="text-xs text-[var(--relay-text-muted)]">discord.gg/ghostrelay</p>
-            </div>
-
-            <div className="glass-card p-5 rounded-xl">
-              <div className="w-9 h-9 rounded-lg bg-[var(--relay-primary)]/8 border border-[var(--relay-primary)]/15 flex items-center justify-center text-[var(--relay-primary)] mb-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">Office</h3>
-              <p className="text-xs text-[var(--relay-text-muted)]">San Francisco, CA</p>
-              <p className="text-xs text-[var(--relay-text-muted)]">Remote-first team 🌍</p>
+              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-1">Response Time</h3>
+              <p className="text-xs text-[var(--relay-text-muted)]">Usually within 24 hours</p>
+              <p className="text-xs text-[var(--relay-text-dim)] mt-1">Faster for critical issues</p>
             </div>
           </div>
 
@@ -125,10 +114,9 @@ export default function ContactPage() {
                     <option value="">Select a topic</option>
                     <option value="general">General Inquiry</option>
                     <option value="support">Technical Support</option>
-                    <option value="sales">Sales / Enterprise</option>
-                    <option value="partnership">Partnership</option>
                     <option value="bug">Bug Report</option>
                     <option value="feature">Feature Request</option>
+                    <option value="privacy">Privacy / Data Request</option>
                   </select>
                 </div>
 
@@ -157,18 +145,21 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Enterprise CTA */}
-      <section className="px-6 md:px-10 lg:px-16 py-16 max-w-4xl mx-auto text-center">
-        <div className="glass-card p-8 rounded-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] relay-gradient"></div>
-          <h2 className="text-xl font-bold mb-3 tracking-tight">Need Enterprise Support?</h2>
-          <p className="text-[var(--relay-text-muted)] text-sm mb-6 max-w-sm mx-auto">
-            Custom domains, SSO, dedicated account management, and SLA guarantees for your organization.
-          </p>
-          <a href="mailto:sales@ghostrelay.me" className="inline-flex items-center gap-2 bg-[var(--relay-primary)] hover:bg-[var(--relay-primary-hover)] text-white font-semibold px-6 py-3 rounded-lg transition-smooth btn-glow text-sm">
-            Talk to Sales
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
+      {/* FAQ */}
+      <section className="px-6 md:px-10 lg:px-16 py-16 max-w-4xl mx-auto">
+        <h2 className="text-2xl font-bold text-center mb-10">Common Questions</h2>
+        <div className="space-y-4">
+          {[
+            { q: "How do I report a security vulnerability?", a: "Email security@ghostrelay.me with details. We take security seriously and respond to responsible disclosure within 24 hours." },
+            { q: "Can I request my data be deleted?", a: "Yes. You can delete your account from Settings, or email support@ghostrelay.me for a manual data deletion request under GDPR." },
+            { q: "Is there an API available?", a: "Not yet publicly, but it's on the roadmap. Follow our GitHub for updates on the public API release." },
+            { q: "How do I report spam coming through an alias?", a: "Use the sender blocklist feature in your dashboard to block specific senders, or disable the alias entirely if it's compromised." },
+          ].map((item, i) => (
+            <div key={i} className="glass-card p-5 rounded-xl">
+              <h3 className="font-semibold text-sm text-[var(--relay-text)] mb-2">{item.q}</h3>
+              <p className="text-xs text-[var(--relay-text-muted)] leading-relaxed">{item.a}</p>
+            </div>
+          ))}
         </div>
       </section>
 
