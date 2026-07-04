@@ -1,6 +1,11 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 
+// authDomain controls the domain shown on the Google sign-in consent screen and
+// the OAuth handler URL (`https://<authDomain>/__/auth/handler`). Point
+// NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN at your own domain (e.g. "auth.ghostrelay.me")
+// — added as an authorized domain in Firebase and serving the auth handler — to
+// show your app URL instead of "<project>.firebaseapp.com". See CONTEXT.md.
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -31,6 +36,8 @@ export function getFirebaseAuth(): Auth {
 export function getGoogleProvider(): GoogleAuthProvider {
   if (!googleProviderInstance) {
     googleProviderInstance = new GoogleAuthProvider();
+    // Always let the user pick which Google account to use.
+    googleProviderInstance.setCustomParameters({ prompt: "select_account" });
   }
   return googleProviderInstance;
 }
