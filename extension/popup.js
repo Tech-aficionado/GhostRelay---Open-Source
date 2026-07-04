@@ -7,7 +7,7 @@
  * - When you open this popup and tokens are in chrome.storage, you're logged in
  */
 
-const API_BASE = 'https://email-alias-worker.ghostrelay-1.workers.dev';
+const API_BASE = 'https://ghostrelay-worker.ghostrelay-1.workers.dev';
 const WEBSITE_URL = 'https://ghostrelay.me';
 
 let currentAlias = '';

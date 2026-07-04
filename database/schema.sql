@@ -1,4 +1,4 @@
--- Email Alias Project - Database Schema (Cloudflare D1 / SQLite)
+-- GhostRelay - Database Schema (Cloudflare D1 / SQLite)
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (

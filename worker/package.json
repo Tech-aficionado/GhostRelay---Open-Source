@@ -1,15 +1,15 @@
 {
-  "name": "email-alias-worker",
+  "name": "ghostrelay-worker",
   "version": "1.0.0",
-  "description": "Email Alias Service - Cloudflare Worker backend",
+  "description": "GhostRelay - Cloudflare Worker backend",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "db:create": "wrangler d1 create email-alias-db",
-    "db:migrate": "wrangler d1 execute email-alias-db --file=../database/schema.sql",
-    "db:migrate:local": "wrangler d1 execute email-alias-db --local --file=../database/schema.sql"
+    "db:create": "wrangler d1 create ghostrelay-db",
+    "db:migrate": "wrangler d1 execute ghostrelay-db --file=../database/schema.sql",
+    "db:migrate:local": "wrangler d1 execute ghostrelay-db --local --file=../database/schema.sql"
   },
   "devDependencies": {
     "wrangler": "^4.97.0"

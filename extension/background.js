@@ -3,7 +3,7 @@
  * Handles context menu integration, alias generation, and token refresh
  */
 
-const API_BASE = 'https://email-alias-worker.ghostrelay-1.workers.dev';
+const API_BASE = 'https://ghostrelay-worker.ghostrelay-1.workers.dev';
 
 // Create context menu item for right-clicking email fields
 chrome.runtime.onInstalled.addListener(() => {

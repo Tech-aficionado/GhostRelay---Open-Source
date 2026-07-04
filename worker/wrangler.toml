@@ -1,11 +1,14 @@
 # Cloudflare Worker Configuration
-name = "email-alias-worker"
+name = "ghostrelay-worker"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 # Environment variables
 [vars]
 EMAIL_DOMAIN = "ghostrelay.me"
+# Inbox that receives organization emails (support@, sales@, legal@, ...).
+# Set to your own address, e.g.  ORG_FORWARD_TO = "you@example.com"
+# ORG_FORWARD_TO = ""
 # JWT_SECRET is set via: npx wrangler secret put JWT_SECRET
 # NEVER put secrets in this file — they get committed to git
 
@@ -19,6 +22,7 @@ database_id = "6c8d4b69-d312-4ffa-9186-475a999e9b6b"
 #   JWT_SECRET       — token signing key
 #   RESEND_API_KEY   — from https://resend.com/api-keys
 #   RESEND_WEBHOOK_SECRET — from Resend webhook settings (for bounce verification)
+#   ORG_FORWARD_TO   — (optional here) can also be set as a [vars] entry above
 #
 # Email routing (to receive emails):
 #   Cloudflare Dashboard → Domain → Email → Email Routing → Catch-all → Send to Worker

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Auto-generate a new GhostRelay email alias directly from signup forms and copy it to clipboard.",
   "permissions": ["activeTab", "storage", "contextMenus", "tabs", "scripting"],
-  "host_permissions": ["https://ghostrelay.me/*", "https://www.ghostrelay.me/*", "https://email-alias-worker.ghostrelay-1.workers.dev/*"],
+  "host_permissions": ["https://ghostrelay.me/*", "https://www.ghostrelay.me/*", "https://ghostrelay-worker.ghostrelay-1.workers.dev/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

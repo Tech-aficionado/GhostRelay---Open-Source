@@ -8,7 +8,7 @@
     "dev:worker": "cd worker && npx wrangler dev",
     "build:frontend": "cd frontend && npm run build",
     "deploy:worker": "cd worker && npx wrangler deploy",
-    "db:setup": "cd worker && npx wrangler d1 execute email-alias-db --local --file=../database/schema.sql",
+    "db:setup": "cd worker && npx wrangler d1 execute ghostrelay-db --local --file=../database/schema.sql",
     "install:all": "cd frontend && npm install && cd ../worker && npm install"
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Email Alias Service - Cloudflare Worker
+ * GhostRelay - Cloudflare Worker
  * Main entry point, router, security middleware
  */
 
