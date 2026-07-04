@@ -333,17 +333,46 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-        <div className="glass-card p-3 sm:p-5 rounded-xl text-center">
-          <div className="text-xl sm:text-3xl font-bold text-[var(--relay-primary)]">{aliases.length}</div>
-          <div className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] mt-1 uppercase tracking-wider font-medium">Total</div>
+        {/* Total + usage */}
+        <div className="glass-card p-3.5 sm:p-5 rounded-xl">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] uppercase tracking-wider font-medium">Total</span>
+            <div className="w-7 h-7 rounded-lg bg-[var(--relay-primary)]/10 flex items-center justify-center text-[var(--relay-primary)] shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-bold text-[var(--relay-text)]">{aliases.length}</div>
+          <div className="mt-2 sm:mt-3 h-1 w-full bg-[var(--relay-border)] rounded-full overflow-hidden">
+            <div
+              className="h-full relay-gradient rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, (aliases.length / currentLimit) * 100)}%` }}
+            />
+          </div>
+          <div className="text-[10px] text-[var(--relay-text-dim)] mt-1.5">{currentLimit - aliases.length} left</div>
         </div>
-        <div className="glass-card p-3 sm:p-5 rounded-xl text-center">
-          <div className="text-xl sm:text-3xl font-bold text-[var(--relay-success)]">{activeCount}</div>
-          <div className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] mt-1 uppercase tracking-wider font-medium">Active</div>
+
+        {/* Active */}
+        <div className="glass-card p-3.5 sm:p-5 rounded-xl">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] uppercase tracking-wider font-medium">Active</span>
+            <div className="w-7 h-7 rounded-lg bg-[var(--relay-success)]/10 flex items-center justify-center text-[var(--relay-success)] shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-bold text-[var(--relay-success)]">{activeCount}</div>
+          <div className="text-[10px] text-[var(--relay-text-dim)] mt-2 sm:mt-4">{aliases.length - activeCount} disabled</div>
         </div>
-        <div className="glass-card p-3 sm:p-5 rounded-xl text-center">
-          <div className="text-xl sm:text-3xl font-bold text-[var(--relay-accent)]">{totalForwarded}</div>
-          <div className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] mt-1 uppercase tracking-wider font-medium">Forwarded</div>
+
+        {/* Forwarded */}
+        <div className="glass-card p-3.5 sm:p-5 rounded-xl">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs text-[var(--relay-text-dim)] uppercase tracking-wider font-medium">Relayed</span>
+            <div className="w-7 h-7 rounded-lg bg-[var(--relay-accent)]/10 flex items-center justify-center text-[var(--relay-accent)] shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-bold text-[var(--relay-accent)]">{totalForwarded}</div>
+          <div className="text-[10px] text-[var(--relay-text-dim)] mt-2 sm:mt-4">emails forwarded</div>
         </div>
       </div>
 
