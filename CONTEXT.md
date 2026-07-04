@@ -49,7 +49,7 @@
 ## Project Structure
 
 ```
-Email-Alias-Project/
+GhostRelay/
 ├── CONTEXT.md                       ← THIS FILE
 ├── README.md                        ← Setup guide & overview
 ├── database/
@@ -196,10 +196,10 @@ When the Worker is running, it connects automatically via `NEXT_PUBLIC_API_URL`.
 ```bash
 cd worker
 npm install
-npx wrangler d1 create email-alias-db
+npx wrangler d1 create ghostrelay-db
 # → Copy the database_id into wrangler.toml
 
-npx wrangler d1 execute email-alias-db --local --file=../database/schema.sql
+npx wrangler d1 execute ghostrelay-db --local --file=../database/schema.sql
 npx wrangler dev
 # → http://localhost:8787
 ```
@@ -240,17 +240,43 @@ npm run build
 
 ### Frontend (.env.local)
 
-| Variable             | Description                        | Example                                     |
-|----------------------|------------------------------------|---------------------------------------------|
-| NEXT_PUBLIC_API_URL  | Worker API base URL                | http://localhost:8787                        |
+| Variable                              | Description                          | Example                       |
+|---------------------------------------|--------------------------------------|-------------------------------|
+| NEXT_PUBLIC_API_URL                   | Worker API base URL                  | http://localhost:8787         |
+| NEXT_PUBLIC_FIREBASE_API_KEY          | Firebase web API key                 | AIza...                       |
+| NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN      | OAuth/consent domain (see below)     | auth.ghostrelay.me            |
+| NEXT_PUBLIC_FIREBASE_PROJECT_ID       | Firebase project ID                  | ghostrelay-xxxxx              |
+| NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET   | Firebase storage bucket              | ghostrelay-xxxxx.appspot.com  |
+| NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID | Firebase messaging sender ID      | 1234567890                    |
+| NEXT_PUBLIC_FIREBASE_APP_ID           | Firebase web app ID                  | 1:123:web:abc                 |
+
+### Authentication (Google-only)
+
+Sign-in is handled entirely by **Google via Firebase Authentication** — there is
+no email/password login. The frontend calls `signInWithPopup`, and the Firebase
+ID token is sent to the Worker as a Bearer token.
+
+**Showing your own domain on the consent screen:** By default the Google sign-in
+popup uses `<project>.firebaseapp.com` as the `authDomain`, which is visible in
+the OAuth handler URL. To display your own app URL instead:
+
+1. In the Firebase console, add your domain (e.g. `auth.ghostrelay.me`) under
+   **Authentication → Settings → Authorized domains**.
+2. Serve the Firebase auth handler on that domain (Firebase Hosting, or a reverse
+   proxy to `/__/auth/handler`).
+3. Set `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=auth.ghostrelay.me`.
+
+Firebase Auth still runs behind the scenes — only the visible domain changes.
 
 ### Worker (wrangler.toml [vars] or secrets)
 
-| Variable      | Description                 | Type   |
-|---------------|-----------------------------|--------|
-| EMAIL_DOMAIN  | Domain for alias addresses  | var    |
-| JWT_SECRET    | Token signing secret        | secret |
-| DB            | D1 database binding         | binding|
+| Variable        | Description                              | Type   |
+|-----------------|------------------------------------------|--------|
+| EMAIL_DOMAIN    | Domain for alias addresses               | var    |
+| ORG_FORWARD_TO  | Inbox that receives org emails (support@)| var    |
+| JWT_SECRET      | Token signing secret                     | secret |
+| RESEND_API_KEY  | Resend API key for outbound mail         | secret |
+| DB              | D1 database binding                      | binding|
 
 ---
 

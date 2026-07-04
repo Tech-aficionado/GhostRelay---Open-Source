@@ -1,8 +1,26 @@
-# GhostRelay
+<div align="center">
 
-A privacy-focused email aliasing service built entirely on Cloudflare's free tier. Generate disposable email aliases that forward to your real inbox — protect your identity from spam, breaches, and data sellers.
+# 👻 GhostRelay
 
-**Live:** [ghostrelay.me](https://www.ghostrelay.me)
+### Privacy-focused email aliasing on Cloudflare's free tier
+
+Generate disposable email aliases that forward to your real inbox — protect your identity from spam, breaches, and data sellers.
+
+**[🌐 Live Demo](https://www.ghostrelay.me)** · **[📖 Docs](./CONTEXT.md)** · **[🤝 Contributing](./CONTRIBUTING.md)**
+
+<br/>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](./CONTRIBUTING.md)
+[![Cost](https://img.shields.io/badge/hosting-%240%2Fmonth-success?style=flat-square)](#tech-stack)
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+
+</div>
 
 ---
 
@@ -74,6 +92,10 @@ Browser / Extension
 ## Running Locally
 
 ```bash
+# Clone
+git clone https://github.com/Tech-aficionado/GhostRelay---Open-Source.git
+cd GhostRelay---Open-Source
+
 # Frontend
 cd frontend
 npm install
@@ -95,6 +117,8 @@ The frontend works in demo mode (localStorage) if no backend is available.
 ```bash
 # Worker
 cd worker
+# Set your own domain and org inbox in wrangler.toml [vars]:
+#   EMAIL_DOMAIN, ORG_FORWARD_TO
 npx wrangler secret put JWT_SECRET
 npx wrangler secret put RESEND_API_KEY
 npx wrangler deploy
@@ -119,6 +143,12 @@ npx vercel --prod
 
 ---
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for
+setup instructions, project layout, and the pull request workflow. Never commit
+secrets — use `.env.example` files to document new environment variables.
+
 ## License
 
-MIT
+Released under the [MIT License](./LICENSE).
