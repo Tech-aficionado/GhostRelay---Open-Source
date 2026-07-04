@@ -11,7 +11,8 @@ import { isSenderBlocked } from './blocklist.js';
 const MAX_EMAIL_SIZE = 256 * 1024; // 256KB max email body
 
 // Organization emails that should NOT be used as aliases.
-// All mail to these addresses is forwarded to the admin/owner.
+// All mail to these addresses is forwarded to the admin/owner inbox,
+// which is configured via the ORG_FORWARD_TO environment variable.
 const ORG_EMAILS = [
     'support@ghostrelay.me',
     'sales@ghostrelay.me',
@@ -19,7 +20,6 @@ const ORG_EMAILS = [
     'privacy@ghostrelay.me',
     'dmarc@ghostrelay.me',
 ];
-const ORG_FORWARD_TO = 'shivansh.goela12@gmail.com';
 
 export async function handleEmail(message, env) {
     // Validate Resend API key exists
@@ -202,6 +202,13 @@ export async function handleEmail(message, env) {
  * directly to the admin inbox without alias lookup.
  */
 async function forwardOrgEmail(message, env, recipientAddress, senderAddress, subject) {
+    const orgForwardTo = env.ORG_FORWARD_TO;
+    if (!orgForwardTo) {
+        console.error('ORG_FORWARD_TO not configured — cannot forward organization email');
+        message.setReject('Service misconfigured');
+        return;
+    }
+
     const rawBody = await readStream(message.raw, MAX_EMAIL_SIZE);
     const { text: emailText, html: emailHtml } = extractBodyParts(rawBody);
     const senderName = sanitizeHeaderValue(extractName(senderAddress));
@@ -215,7 +222,7 @@ async function forwardOrgEmail(message, env, recipientAddress, senderAddress, su
     try {
         const resendPayload = {
             from: `${senderName} via GhostRelay <${fromAddress}>`,
-            to: [ORG_FORWARD_TO],
+            to: [orgForwardTo],
             reply_to: senderAddress,
             subject: `[${recipientAddress.split('@')[0]}] ${subject}`,
             html: forwardedHtml,
@@ -242,7 +249,7 @@ async function forwardOrgEmail(message, env, recipientAddress, senderAddress, su
             return;
         }
 
-        console.log(`Org email forwarded: ${recipientAddress} from ${senderAddress} -> ${ORG_FORWARD_TO}`);
+        console.log(`Org email forwarded: ${recipientAddress} from ${senderAddress} -> ${orgForwardTo}`);
     } catch (error) {
         console.error('Org email forward error:', error.message || error);
         message.setReject('Forwarding failed');
