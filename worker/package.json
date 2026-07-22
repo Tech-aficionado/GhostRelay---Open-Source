@@ -1,11 +1,12 @@
 {
   "name": "ghostrelay-worker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "GhostRelay - Cloudflare Worker backend",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "test": "node --test",
     "deploy": "wrangler deploy",
     "db:create": "wrangler d1 create ghostrelay-db",
     "db:migrate": "wrangler d1 execute ghostrelay-db --file=../database/schema.sql",
