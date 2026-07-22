@@ -52,7 +52,7 @@ Generate disposable email aliases that forward to your real inbox — protect yo
 ## Features
 
 - **Alias management** — Create, label, enable/disable, delete
-- **Wildcard aliases** — Patterns like `*-shopping` auto-create tracked aliases
+- **Wildcard aliases** — Patterns like `*-shopping` auto-create tracked aliases (`*` is the only wildcard; matched literally otherwise and scoped to your domain)
 - **Multiple destinations** — Forward one alias to up to 5 inboxes
 - **Temporary aliases** — Auto-expire after N days or N emails
 - **Activity logs** — See who emailed which alias and when
@@ -109,6 +109,18 @@ npx wrangler dev    # → http://localhost:8787
 ```
 
 The frontend works in demo mode (localStorage) if no backend is available.
+
+---
+
+## Testing
+
+The worker's pure logic (wildcard matching, alias deliverability) is covered by a
+unit suite that runs on Node's built-in test runner — no extra dependencies.
+
+```bash
+cd worker
+npm test            # runs `node --test`
+```
 
 ---
 
