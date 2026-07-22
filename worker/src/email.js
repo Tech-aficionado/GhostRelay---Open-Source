@@ -10,6 +10,29 @@ import { isSenderBlocked } from './blocklist.js';
 
 const MAX_EMAIL_SIZE = 256 * 1024; // 256KB max email body
 
+// Reject reasons returned to the sending MTA when an alias can't receive mail.
+const BLOCK_REASON_MESSAGES = {
+    disabled: 'Address is disabled',
+    expired: 'Address has expired',
+    limit: 'Address has reached its email limit',
+};
+
+/**
+ * Determine whether an alias may currently receive mail.
+ * Pure function (no I/O) so it can be unit tested in isolation.
+ *
+ * @param {{active?: number|boolean, expires_at?: string|null, max_emails?: number|null, forwarded_count?: number}} alias
+ * @param {Date} [now] - injectable clock for testing
+ * @returns {null|'not_found'|'disabled'|'expired'|'limit'} null when deliverable, else a reason
+ */
+export function getAliasBlockReason(alias, now = new Date()) {
+    if (!alias) return 'not_found';
+    if (!alias.active) return 'disabled';
+    if (alias.expires_at && new Date(alias.expires_at) < now) return 'expired';
+    if (alias.max_emails && (alias.forwarded_count ?? 0) >= alias.max_emails) return 'limit';
+    return null;
+}
+
 // Organization emails that should NOT be used as aliases.
 // All mail to these addresses is forwarded to the admin/owner inbox,
 // which is configured via the ORG_FORWARD_TO environment variable.
@@ -66,23 +89,15 @@ export async function handleEmail(message, env) {
         return;
     }
 
-    if (!alias.active) {
-        message.setReject('Address is disabled');
-        return;
-    }
-
-    // Check if alias has expired (temporary alias support)
-    if (alias.expires_at && new Date(alias.expires_at) < new Date()) {
-        // Auto-disable expired alias
-        await env.DB.prepare('UPDATE aliases SET active = 0 WHERE id = ?').bind(alias.id).run();
-        message.setReject('Address has expired');
-        return;
-    }
-
-    // Check if alias has hit its max email limit
-    if (alias.max_emails && alias.forwarded_count >= alias.max_emails) {
-        await env.DB.prepare('UPDATE aliases SET active = 0 WHERE id = ?').bind(alias.id).run();
-        message.setReject('Address has reached its email limit');
+    // Centralized deliverability check (active / expiry / email-cap).
+    const blockReason = getAliasBlockReason(alias);
+    if (blockReason) {
+        // Auto-disable expired or exhausted aliases so the dashboard reflects
+        // reality and subsequent lookups short-circuit without recomputing.
+        if (blockReason === 'expired' || blockReason === 'limit') {
+            await env.DB.prepare('UPDATE aliases SET active = 0 WHERE id = ?').bind(alias.id).run();
+        }
+        message.setReject(BLOCK_REASON_MESSAGES[blockReason] || 'Address unavailable');
         return;
     }
 
@@ -687,8 +702,12 @@ async function getForwardingDestinations(aliasId, defaultEmail, env) {
  * Returns an alias-like object if matched, or null.
  */
 async function matchWildcardAlias(recipientAddress, env) {
-    const localPart = recipientAddress.split('@')[0];
-    const domain = recipientAddress.split('@')[1];
+    const [localPart, domain] = recipientAddress.split('@');
+
+    // Only match wildcard rules for the domain this worker is configured for.
+    // Prevents a rule from unintentionally matching addresses on other domains.
+    const configuredDomain = (env.EMAIL_DOMAIN || 'ghostrelay.me').toLowerCase();
+    if (!domain || domain.toLowerCase() !== configuredDomain) return null;
 
     // Get all active wildcard rules
     const { results } = await env.DB.prepare(
@@ -737,16 +756,28 @@ async function matchWildcardAlias(recipientAddress, env) {
 }
 
 /**
- * Match a local part against a wildcard pattern.
- * '*' matches any sequence of characters.
+ * Convert a wildcard pattern into a RegExp where `*` is the only wildcard.
+ * Every other regex metacharacter is escaped so it's matched literally — this
+ * closes a leak where characters like `?` or `+` in a pattern were previously
+ * interpreted as regex operators. `*` matches any run of characters within the
+ * local part but never crosses the `@` boundary.
+ *
+ * @param {string} pattern
+ * @returns {RegExp}
  */
-function matchPattern(input, pattern) {
-    // Convert wildcard pattern to regex
-    const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-    const regexStr = '^' + escaped.replace(/\*/g, '.*') + '$';
+export function wildcardToRegExp(pattern) {
+    const escaped = String(pattern).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regexStr = '^' + escaped.replace(/\\\*/g, '[^@]*') + '$';
+    return new RegExp(regexStr, 'i');
+}
+
+/**
+ * Match a local part against a wildcard pattern.
+ * '*' matches any sequence of characters within the local part.
+ */
+export function matchPattern(input, pattern) {
     try {
-        const regex = new RegExp(regexStr, 'i');
-        return regex.test(input);
+        return wildcardToRegExp(pattern).test(input);
     } catch {
         return false;
     }

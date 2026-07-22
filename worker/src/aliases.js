@@ -4,6 +4,7 @@
  */
 
 import { authenticateRequest } from './auth.js';
+import { getAliasBlockReason } from './email.js';
 
 const MAX_ALIASES = 20;
 const MAX_LABEL_LENGTH = 100;
@@ -78,20 +79,30 @@ async function listAliases(userId, env) {
         'SELECT id, address, label, notes, category, active, forwarded_count, expires_at, max_emails, is_temporary, created_at FROM aliases WHERE user_id = ? ORDER BY created_at DESC'
     ).bind(userId).all();
 
+    const now = new Date();
+
     return Response.json({
-        aliases: results.map(row => ({
-            id: row.id,
-            address: row.address,
-            label: row.label,
-            notes: row.notes || '',
-            category: row.category || '',
-            active: Boolean(row.active),
-            forwarded: row.forwarded_count,
-            expiresAt: row.expires_at || null,
-            maxEmails: row.max_emails || null,
-            isTemporary: Boolean(row.is_temporary),
-            createdAt: row.created_at,
-        })),
+        aliases: results.map(row => {
+            // Derived, read-only status so the dashboard can show an alias as
+            // spent/expired even before an inbound email auto-disables it.
+            const blockReason = getAliasBlockReason(row, now);
+            return {
+                id: row.id,
+                address: row.address,
+                label: row.label,
+                notes: row.notes || '',
+                category: row.category || '',
+                active: Boolean(row.active),
+                forwarded: row.forwarded_count,
+                expiresAt: row.expires_at || null,
+                maxEmails: row.max_emails || null,
+                isTemporary: Boolean(row.is_temporary),
+                expired: blockReason === 'expired',
+                limitReached: blockReason === 'limit',
+                deliverable: blockReason === null,
+                createdAt: row.created_at,
+            };
+        }),
         count: results.length,
         limit: MAX_ALIASES,
     });
