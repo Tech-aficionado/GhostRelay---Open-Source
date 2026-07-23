@@ -15,36 +15,39 @@ export default function Logo({ size = 32, showText = true, className = "" }: Log
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Rounded square background with brand gradient */}
-        <rect width="40" height="40" rx="10" fill="url(#logo-grad)" />
+        {/* Tile */}
+        <rect width="40" height="40" rx="10" fill="url(#lg-tile)" />
+        <rect x="0.6" y="0.6" width="38.8" height="38.8" rx="9.4" fill="none" stroke="#7c3aed" strokeOpacity="0.35" />
 
         {/* Ghost body */}
         <path
-          d="M20 8c-5.5 0-10 4.2-10 9.5v12c0 .8.5 1.3 1 1 .6-.3 1.2-.3 1.8 0 .8.4 1.6.4 2.4 0 .8-.4 1.6-.4 2.4 0 .8.4 1.6.4 2.4 0 .8-.4 1.6-.4 2.4 0 .8.4 1.6.4 2.4 0 .6-.3 1.2-.3 1.8 0 .5.3 1-.2 1-1v-12C30 12.2 25.5 8 20 8z"
-          fill="white"
-          fillOpacity="0.95"
+          d="M10.5 21 C10.5 14.4 14.7 10 20 10 C25.3 10 29.5 14.4 29.5 21 L29.5 30.2
+             Q27.8 28.2 26.1 30.2 Q24.4 32.2 22.7 30.2 Q21 28.2 19.3 30.2
+             Q17.6 32.2 15.9 30.2 Q14.4 28.4 12.6 30.2 Q11.6 31.2 10.5 30.2 Z"
+          fill="url(#lg-ghost)"
         />
 
-        {/* Ghost eyes */}
-        <circle cx="16" cy="18" r="2.2" fill="#030303" />
-        <circle cx="24" cy="18" r="2.2" fill="#030303" />
+        {/* Cheeks */}
+        <ellipse cx="15" cy="23.4" rx="1.7" ry="1.1" fill="#06d6a0" opacity="0.4" />
+        <ellipse cx="25" cy="23.4" rx="1.7" ry="1.1" fill="#06d6a0" opacity="0.4" />
 
-        {/* Mail envelope on the ghost body */}
-        <rect x="15" y="22" width="10" height="6" rx="1.5" fill="url(#logo-grad)" fillOpacity="0.9" />
-        <path
-          d="M15 22.5l5 3 5-3"
-          stroke="white"
-          strokeWidth="1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
+        {/* Eyes */}
+        <ellipse cx="16.6" cy="19.4" rx="1.9" ry="2.4" fill="#0a0e1a" />
+        <ellipse cx="23.4" cy="19.4" rx="1.9" ry="2.4" fill="#0a0e1a" />
+        <circle cx="17.3" cy="18.5" r="0.7" fill="#e8eaf6" />
+        <circle cx="24.1" cy="18.5" r="0.7" fill="#e8eaf6" />
+
+        {/* Smile */}
+        <path d="M18.2 22.5 Q20 24.1 21.8 22.5" fill="none" stroke="#0a0e1a" strokeWidth="0.9" strokeLinecap="round" />
 
         <defs>
-          <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#14b8a6" />
-            <stop offset="50%" stopColor="#22d3ee" />
-            <stop offset="100%" stopColor="#a78bfa" />
+          <linearGradient id="lg-tile" x1="0" y1="0" x2="0" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#12182b" />
+            <stop offset="100%" stopColor="#0a0e1a" />
+          </linearGradient>
+          <linearGradient id="lg-ghost" x1="0" y1="0" x2="0" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#7c3aed" />
           </linearGradient>
         </defs>
       </svg>

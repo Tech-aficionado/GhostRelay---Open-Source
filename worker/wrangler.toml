@@ -1,5 +1,6 @@
 # Cloudflare Worker Configuration
-name = "ghostrelay-worker"
+# Name must match the connected Cloudflare Workers Builds service ("ghost-relay").
+name = "ghost-relay"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
