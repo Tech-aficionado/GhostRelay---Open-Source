@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="GhostRelay — Privacy-focused email aliasing">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0e1a"/>
+      <stop offset="1" stop-color="#12182b"/>
+    </linearGradient>
+    <linearGradient id="ghost" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="tag" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#06d6a0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="400" rx="16" fill="url(#bg)"/>
+
+  <!-- dotted texture -->
+  <g fill="#2a3563" opacity="0.20">
+    <circle cx="44" cy="40" r="2"/><circle cx="108" cy="40" r="2"/><circle cx="172" cy="40" r="2"/><circle cx="236" cy="40" r="2"/><circle cx="300" cy="40" r="2"/><circle cx="364" cy="40" r="2"/><circle cx="428" cy="40" r="2"/><circle cx="492" cy="40" r="2"/><circle cx="556" cy="40" r="2"/><circle cx="620" cy="40" r="2"/><circle cx="684" cy="40" r="2"/><circle cx="748" cy="40" r="2"/><circle cx="812" cy="40" r="2"/><circle cx="876" cy="40" r="2"/><circle cx="940" cy="40" r="2"/><circle cx="1004" cy="40" r="2"/><circle cx="1068" cy="40" r="2"/><circle cx="1132" cy="40" r="2"/><circle cx="1196" cy="40" r="2"/><circle cx="1240" cy="40" r="2"/>
+    <circle cx="44" cy="104" r="2"/><circle cx="108" cy="104" r="2"/><circle cx="172" cy="104" r="2"/><circle cx="236" cy="104" r="2"/><circle cx="300" cy="104" r="2"/><circle cx="364" cy="104" r="2"/><circle cx="428" cy="104" r="2"/><circle cx="492" cy="104" r="2"/><circle cx="556" cy="104" r="2"/><circle cx="620" cy="104" r="2"/><circle cx="684" cy="104" r="2"/><circle cx="748" cy="104" r="2"/><circle cx="812" cy="104" r="2"/><circle cx="876" cy="104" r="2"/><circle cx="940" cy="104" r="2"/><circle cx="1004" cy="104" r="2"/><circle cx="1068" cy="104" r="2"/><circle cx="1132" cy="104" r="2"/><circle cx="1196" cy="104" r="2"/><circle cx="1240" cy="104" r="2"/>
+    <circle cx="812" cy="168" r="2"/><circle cx="876" cy="168" r="2"/><circle cx="940" cy="168" r="2"/><circle cx="1004" cy="168" r="2"/><circle cx="1068" cy="168" r="2"/><circle cx="1132" cy="168" r="2"/><circle cx="1196" cy="168" r="2"/><circle cx="1240" cy="168" r="2"/>
+    <circle cx="812" cy="360" r="2"/><circle cx="876" cy="360" r="2"/><circle cx="940" cy="360" r="2"/><circle cx="1004" cy="360" r="2"/><circle cx="1068" cy="360" r="2"/><circle cx="1132" cy="360" r="2"/><circle cx="1196" cy="360" r="2"/><circle cx="1240" cy="360" r="2"/>
+  </g>
+
+  <!-- glow behind ghost -->
+  <ellipse cx="205" cy="205" rx="180" ry="180" fill="url(#glow)"/>
+
+  <!-- ghost -->
+  <g transform="translate(95,92) scale(0.92)">
+    <g filter="url(#soft)" opacity="0.55">
+      <path d="M10,120 C10,55 55,10 110,10 C165,10 210,55 210,120 L210,215
+               Q195,198 180,215 Q165,232 150,215 Q135,198 120,215
+               Q105,232 90,215 Q75,198 60,215 Q45,232 30,215 Q22,207 10,215 Z"
+            fill="#7c3aed"/>
+    </g>
+    <path d="M10,120 C10,55 55,10 110,10 C165,10 210,55 210,120 L210,215
+             Q195,198 180,215 Q165,232 150,215 Q135,198 120,215
+             Q105,232 90,215 Q75,198 60,215 Q45,232 30,215 Q22,207 10,215 Z"
+          fill="url(#ghost)"/>
+    <ellipse cx="62" cy="150" rx="14" ry="9" fill="#06d6a0" opacity="0.35"/>
+    <ellipse cx="158" cy="150" rx="14" ry="9" fill="#06d6a0" opacity="0.35"/>
+    <ellipse cx="78" cy="112" rx="15" ry="19" fill="#0a0e1a"/>
+    <ellipse cx="142" cy="112" rx="15" ry="19" fill="#0a0e1a"/>
+    <circle cx="83" cy="106" r="5" fill="#e8eaf6"/>
+    <circle cx="147" cy="106" r="5" fill="#e8eaf6"/>
+    <path d="M96,138 Q110,152 124,138" fill="none" stroke="#0a0e1a" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- text -->
+  <text x="430" y="178" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="92" font-weight="800" fill="#e8eaf6" letter-spacing="-2">GhostRelay</text>
+  <text x="434" y="228" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="31" font-weight="600" fill="url(#tag)">Privacy-focused email aliasing</text>
+  <text x="434" y="266" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#8892b0">Disposable aliases that forward to your real inbox — kill spam with one click.</text>
+
+  <!-- alias pill -->
+  <rect x="434" y="296" width="452" height="58" rx="29" fill="#12182b" stroke="#2a3563" stroke-width="2"/>
+  <circle cx="468" cy="325" r="7" fill="#06d6a0"/>
+  <text x="488" y="334" font-family="Consolas, 'Courier New', monospace" font-size="26" fill="#06d6a0">a7x9k2m@ghostrelay.me</text>
+
+  <!-- cost badge -->
+  <text x="912" y="333" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#8892b0">on Cloudflare · <tspan fill="#a78bfa" font-weight="700">$0/mo</tspan></text>
+</svg>
