@@ -7,16 +7,26 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0d9488",
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0e1a" },
+    { media: "(prefers-color-scheme: light)", color: "#7c3aed" },
+  ],
 };
+
+const SITE_URL = "https://www.ghostrelay.me";
+const SITE_TITLE = "GhostRelay — Email Privacy, Simplified";
+const SITE_DESCRIPTION =
+  "Create disposable email aliases that forward to your real inbox. Protect your identity from spam, data breaches, and tracking — free and open source.";
 
 export const metadata: Metadata = {
   title: {
-    default: "GhostRelay — Email Privacy, Simplified",
+    default: SITE_TITLE,
     template: "%s | GhostRelay",
   },
-  description:
-    "Create unlimited email aliases that forward to your real inbox. Protect your identity from spam, data breaches, and unwanted tracking. Free forever.",
+  description: SITE_DESCRIPTION,
+  applicationName: "GhostRelay",
+  category: "productivity",
   keywords: [
     "email alias",
     "email privacy",
@@ -24,34 +34,52 @@ export const metadata: Metadata = {
     "email forwarding",
     "email masking",
     "spam protection",
+    "temporary email",
+    "anonymous email",
     "privacy tool",
     "ghostrelay",
   ],
-  authors: [{ name: "GhostRelay" }],
+  authors: [{ name: "GhostRelay", url: SITE_URL }],
   creator: "GhostRelay",
-  metadataBase: new URL("https://www.ghostrelay.me"),
+  publisher: "GhostRelay",
+  metadataBase: new URL(SITE_URL),
+  formatDetection: { email: false, address: false, telephone: false },
+  appleWebApp: {
+    capable: true,
+    title: "GhostRelay",
+    statusBarStyle: "black-translucent",
+  },
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/logo.svg"],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.ghostrelay.me",
+    url: SITE_URL,
     siteName: "GhostRelay",
-    title: "GhostRelay — Email Privacy, Simplified",
+    title: SITE_TITLE,
     description:
-      "Create email aliases that forward to your real inbox. Stay hidden from spam and data breaches.",
+      "Give every service its own ghost address. Kill spam with one click — your real inbox stays invisible.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "GhostRelay — Your Emails, Invisible to the World",
+        alt: "GhostRelay — Privacy-focused email aliasing",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "GhostRelay — Email Privacy, Simplified",
+    title: SITE_TITLE,
     description:
-      "Create email aliases that forward to your real inbox. Stay hidden from spam and data breaches.",
+      "Give every service its own ghost address. Kill spam with one click — your real inbox stays invisible.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -66,7 +94,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://www.ghostrelay.me",
+    canonical: SITE_URL,
   },
 };
 
