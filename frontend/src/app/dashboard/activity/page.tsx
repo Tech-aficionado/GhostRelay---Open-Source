@@ -9,6 +9,7 @@ export default function ActivityPage() {
   const { showToast } = useDashboard();
   const [logs, setLogs] = useState<api.EmailLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const limit = 25;
@@ -35,6 +36,23 @@ export default function ActivityPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    const token = getToken();
+    if (!token) return;
+    setRefreshing(true);
+    try {
+      const data = await api.listEmailLogs(token, limit, offset);
+      setLogs(data.logs);
+      setTotal(data.total);
+      showToast("Activity refreshed", "success");
+    } catch {
+      showToast("Failed to refresh activity", "error");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
@@ -49,11 +67,36 @@ export default function ActivityPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--relay-text)]">Email Activity</h1>
-        <p className="text-[var(--relay-text-muted)] text-sm mt-1">
-          Recent emails forwarded through your aliases
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--relay-text)]">Email Activity</h1>
+          <p className="text-[var(--relay-text-muted)] text-sm mt-1">
+            Recent emails forwarded through your aliases
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing || loading}
+          aria-label="Refresh activity"
+          className="inline-flex items-center gap-2 text-sm border border-[var(--relay-border)] hover:border-[var(--relay-primary)] text-[var(--relay-text-muted)] hover:text-[var(--relay-primary)] px-4 py-2 rounded-xl transition-smooth disabled:opacity-50 disabled:cursor-not-allowed font-medium flex-shrink-0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={refreshing ? "animate-spin" : ""}
+          >
+            <path d="M23 4v6h-6" />
+            <path d="M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+          </svg>
+          <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
+        </button>
       </div>
 
       {loading ? (
